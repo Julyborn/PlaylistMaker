@@ -16,6 +16,8 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var backButton: ImageView
     private lateinit var clearButton: ImageView
 
+    private var searchQuery: String = ""
+
     private val SEARCH_QUERY_STATE_KEY = "search_query"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,10 +37,8 @@ class SearchActivity : AppCompatActivity() {
             clearButton.visibility = View.GONE
         }
 
-
-
         searchEditText = findViewById(R.id.search_edit_text)
-        searchEditText.setText(savedInstanceState?.getString(SEARCH_QUERY_STATE_KEY))
+        searchEditText.setText(searchQuery)
         searchEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
@@ -47,8 +47,19 @@ class SearchActivity : AppCompatActivity() {
             }
 
             override fun afterTextChanged(s: Editable?) {
-                savedInstanceState?.putString(SEARCH_QUERY_STATE_KEY, s.toString())
+                searchQuery = s.toString()
             }
         })
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(SEARCH_QUERY_STATE_KEY, searchQuery)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        searchQuery = savedInstanceState.getString(SEARCH_QUERY_STATE_KEY, "")
+        searchEditText.setText(searchQuery)
     }
 }

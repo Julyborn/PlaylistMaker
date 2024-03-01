@@ -36,29 +36,19 @@
 
 
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp">
+        android:layout_marginTop="24dp"
+        style="@style/settings_button">>
         <TextView
             style="@style/settings_text"
             android:text="@string/dark_theme" />
         <Switch
             android:id="@+id/switchDarkTheme"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center|end"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            android:paddingVertical="11dp"
-            android:checked="false"
-            android:paddingStart="9dp"
-            android:paddingEnd="12dp"/>
+            style="@style/settings_icon"/>
     </FrameLayout>
 
     <FrameLayout
         android:id="@+id/shareButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        style="@style/settings_button">
         <TextView
             style="@style/settings_text"
             android:text="@string/share_app" />
@@ -69,8 +59,7 @@
 
     <FrameLayout
         android:id="@+id/supportButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        style="@style/settings_button">
         <TextView
             style="@style/settings_text"
             android:text="@string/write_to_support" />
@@ -79,10 +68,11 @@
             android:src="@drawable/ic_support" />
     </FrameLayout>
 
+
+
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/agreementButton">
+        android:id="@+id/agreementButton"
+        style="@style/settings_button">
         <TextView
             style="@style/settings_text"
             android:text="@string/users_assignment" />
@@ -90,6 +80,5 @@
             style="@style/settings_icon"
             android:src="@drawable/ic_arrow_forward" />
     </FrameLayout>
-
 
 </LinearLayout>
