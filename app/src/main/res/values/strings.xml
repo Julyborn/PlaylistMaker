@@ -15,6 +15,9 @@
     <string name="legal_practicum_offer_link">https://yandex.ru/legal/practicum_offer/</string>
     <string name="search_hint">Поиск</string>
     <string name="track_name_placeholder">Ошибка загрузки</string>
-
+    <string name="no_data_found">Ничего не нашлось</string>
+    <string name="connection_error">Проблемы со связью</string>
+    <string name="check_connection">Загрузка не удалась. Проверьте подключение к интернету</string>
+    <string name="reload">Обновить</string>
 
 </resources>

@@ -1,3 +1,5 @@
+
+
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -6,10 +8,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
 import com.example.playlistmaker.Track
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class TrackAdapter(private val context: Context, private val tracks: List<Track>) :
     RecyclerView.Adapter<TrackAdapter.TrackViewHolder>() {
@@ -23,15 +26,9 @@ class TrackAdapter(private val context: Context, private val tracks: List<Track>
         fun bind(track: Track) {
             trackNameTextView.text = track.trackName
             artistNameTextView.text = track.artistName
-            trackTimeTextView.text = track.trackTime
-
+            trackTimeTextView.text = SimpleDateFormat("mm:ss", Locale.getDefault()).format(track.trackTimeMillis)
             Glide.with(itemView.context)
                 .load(track.artworkUrl100)
-
-                // стоит убрать после спринта 10, код нужен что бы проверить placeholder'ы при запуске без инета
-                .skipMemoryCache(true) // Пропустить кэширование в памяти
-                .diskCacheStrategy(DiskCacheStrategy.NONE) // Не кэшировать на диске
-
                 .placeholder(R.drawable.ic_search_placeholder)
                 .centerCrop()
                 .transform(RoundedCorners(2))

@@ -27,26 +27,29 @@
             tools:text="@string/track_name_placeholder" />
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
             <TextView
                 android:id="@+id/artist_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 style="@style/search_small_text"/>
 
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="13dp"
-                android:layout_gravity="center_vertical"
                 android:layout_marginHorizontal="5dp"
-                android:layout_marginTop="1dp"
                 android:src="@drawable/ic_dot"
                 app:tint="?attr/colorOnSecondary" />
 
             <TextView
                 android:id="@+id/track_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 style="@style/search_small_text"/>
         </LinearLayout>
     </LinearLayout>

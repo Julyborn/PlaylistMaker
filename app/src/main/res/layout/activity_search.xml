@@ -61,7 +61,9 @@
             android:paddingVertical="9dp"
             android:textSize="16sp"
             android:lineHeight="19dp"
-            android:textFontWeight="400"/>
+            android:textFontWeight="400"
+            android:imeOptions="actionDone"
+            android:singleLine="true"/>
 
         <ImageView
             android:id="@+id/clearButton"
@@ -76,12 +78,50 @@
             android:layout_marginEnd="2dp" />
 
     </FrameLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/search_results"
         android:layout_marginTop="23dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+    <LinearLayout
+        android:id="@+id/error_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_marginTop="102dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/error_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/no_data_found"/>
+
+        <TextView
+            android:id="@+id/error_text"
+            style="@style/text_view_error"
+            android:layout_gravity="center" />
+
+        <TextView
+            android:id="@+id/error_sub_text"
+            style="@style/text_view_error"/>
+
+        <Button
+            android:id="@+id/reload_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/reload"
+            app:cornerRadius="24dp"
+            android:layout_gravity="center"
+            android:textAllCaps="false"
+            style="@style/button_reload"/>
+    </LinearLayout>
+
 
 </LinearLayout>
