@@ -1,8 +1,127 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?attr/colorSecondaryVariant">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="4dp">
+
+        <ImageView
+            android:id="@+id/back_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:padding="18dp"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="?attr/colorPrimaryVariant"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="@string/search"
+            android:textColor="?attr/colorPrimaryVariant"
+            android:paddingHorizontal="12dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="12dp"
+            android:textSize="22sp"
+            android:fontFamily="@font/ys_display_medium"/>
+    </LinearLayout>
+
+
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp">
+
+        <EditText
+            android:id="@+id/search_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:background="@drawable/ic_edit_text_rounded_8px"
+            android:drawableStart="@drawable/ic_search"
+            android:drawablePadding="8dp"
+            android:drawableTint="?attr/colorSecondary"
+            android:fontFamily="@font/ys_display_regular"
+            android:gravity="center_vertical"
+            android:hint="@string/search_hint"
+            android:inputType="text"
+            android:lines="1"
+            android:textColor="@color/black"
+            android:textColorHint="?attr/colorSecondary"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="9dp"
+            android:textSize="16sp"
+            android:lineHeight="19dp"
+            android:textFontWeight="400"
+            android:imeOptions="actionDone"
+            android:singleLine="true"/>
+
+        <ImageView
+            android:id="@+id/clearButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|end"
+            android:src="@drawable/ic_crossed"
+            android:padding="12dp"
+            app:tint="?attr/colorSecondary"
+            android:background="@android:color/transparent"
+            android:visibility="gone"
+            android:layout_marginEnd="2dp" />
+
+    </FrameLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/search_results"
+        android:layout_marginTop="23dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+    <LinearLayout
+        android:id="@+id/error_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_marginTop="102dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/error_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/no_data_found"/>
+
+        <TextView
+            android:id="@+id/error_text"
+            style="@style/text_view_error"
+            android:layout_gravity="center" />
+
+        <TextView
+            android:id="@+id/error_sub_text"
+            style="@style/text_view_error"/>
+
+        <Button
+            android:id="@+id/reload_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/reload"
+            app:cornerRadius="24dp"
+            android:layout_gravity="center"
+            android:textAllCaps="false"
+            style="@style/button_reload"/>
+    </LinearLayout>
+
 
 </LinearLayout>

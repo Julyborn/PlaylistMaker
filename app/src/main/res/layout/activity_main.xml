@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/blue"
+    android:background="?attr/colorPrimary"
     android:orientation="vertical"
     tools:context=".MainActivity">
 
@@ -22,7 +22,8 @@
             android:paddingHorizontal="12dp"
             android:paddingTop="10dp"
             android:paddingBottom="12dp"
-            android:textSize="22sp" />
+            android:textSize="22sp"
+            android:fontFamily="@font/ys_display_medium"/>
     </FrameLayout>
 
     <LinearLayout
