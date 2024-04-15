@@ -22,7 +22,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class SearchActivity : AppCompatActivity() {
+class SearchActivity : AppCompatActivity(), TrackInteractionListener {
 
     // UI Elements
     private lateinit var searchField: EditText
@@ -49,14 +49,16 @@ class SearchActivity : AppCompatActivity() {
     private var trackList = ArrayList<Track>()
     private var historyList = SearchHistory.load()
     private val SEARCH_QUERY_STATE_KEY = "search_query"
-    private val historyAdapter = TrackAdapter(this, historyList)
-    private val searchAdapter = TrackAdapter(this, trackList)
+    private val searchAdapter = TrackAdapter(this, trackList, this)
+    private val historyAdapter = TrackAdapter(this, historyList, this)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
         setupUI()
 
+
         backButton.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
+
 
         clearSearchButton.setOnClickListener { clearSearchField() }
 
@@ -189,9 +191,13 @@ class SearchActivity : AppCompatActivity() {
         trackList.clear()
         searchRecyclerView.visibility = View.GONE
         clearSearchButton.visibility = View.GONE
+
+        historyLayout.visibility = View.VISIBLE
+    }
+
+    override fun onTrackSelected(track: Track) {
         historyList.clear()
         historyList.addAll(SearchHistory.load())
         historyAdapter.notifyDataSetChanged()
-        historyLayout.visibility = View.VISIBLE
     }
 }
