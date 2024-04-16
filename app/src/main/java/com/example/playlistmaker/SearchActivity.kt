@@ -191,8 +191,6 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
         trackList.clear()
         searchRecyclerView.visibility = View.GONE
         clearSearchButton.visibility = View.GONE
-
-        historyLayout.visibility = View.VISIBLE
     }
 
     override fun onTrackSelected(track: Track) {
