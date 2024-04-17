@@ -7,26 +7,25 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 
 
 class SettingsActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
-        val backImage = findViewById<ImageView>(R.id.back_button)
-        backImage.setOnClickListener {
+
+        val backButton = findViewById<ImageView>(R.id.back_button)
+        backButton.setOnClickListener {
             finish()
         }
 
         val switchDarkTheme: Switch = findViewById(R.id.switchDarkTheme)
-        switchDarkTheme.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            } else {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-            }
-
+        if ((applicationContext as App).darkTheme) {
+            switchDarkTheme.isChecked = true;
+        }
+        switchDarkTheme.setOnCheckedChangeListener { _, checked ->
+            (applicationContext as App).switchTheme(checked)
         }
 
         val shareButton: FrameLayout = findViewById(R.id.shareButton)
@@ -44,6 +43,7 @@ class SettingsActivity : AppCompatActivity() {
             openUserAgreement()
         }
     }
+
 
     private fun shareApp() {
         val sendIntent: Intent = Intent().apply {
