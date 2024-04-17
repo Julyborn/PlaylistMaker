@@ -1,6 +1,7 @@
 package com.example.playlistmaker
 
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -51,7 +52,7 @@ class PlayerActivity : AppCompatActivity() {
         artistName.text = track.artistName
         loadImage(track.artworkUrl100)
         trackLength.text = SimpleDateFormat("mm:ss", Locale.getDefault()).format(track.trackTimeMillis)
-        trackAlbum.text = track.collectionName
+        updateAlbumVisibility(track.collectionName)
         trackYear.text = extractYear(track.releaseDate)
         trackStyle.text = track.primaryGenreName
         trackCountry.text = track.country
@@ -64,6 +65,17 @@ class PlayerActivity : AppCompatActivity() {
             .transform(RoundedCorners(radius.toInt()))
             .placeholder(R.drawable.ic_search_placeholder)
             .into(playerImg)
+    }
+
+    private fun updateAlbumVisibility(albumName: String) {
+        if (albumName.isEmpty()) {
+            trackAlbum.visibility = View.GONE
+            staticTrackAlbum.visibility = View.GONE
+        } else {
+            trackAlbum.visibility = View.VISIBLE
+            staticTrackAlbum.visibility = View.VISIBLE
+            trackAlbum.text = albumName
+        }
     }
 
     private fun extractYear(dateString: String): String = dateString.replaceAfter('-', "").substring(0, 4)
