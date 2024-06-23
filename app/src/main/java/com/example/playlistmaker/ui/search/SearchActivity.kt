@@ -1,6 +1,5 @@
-package com.example.playlistmaker
+package com.example.playlistmaker.ui.search
 
-import TrackAdapter
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -20,12 +19,13 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.playlistmaker.Creator
+import com.example.playlistmaker.R
+import com.example.playlistmaker.domain.api.TrackInteractionListener
+import com.example.playlistmaker.domain.api.TrackInteractor
+import com.example.playlistmaker.domain.models.Track
+import com.example.playlistmaker.ui.player.PlayerActivity
 import com.google.gson.Gson
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 class SearchActivity : AppCompatActivity(), TrackInteractionListener {
 
@@ -43,17 +43,12 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
     private lateinit var errorSubText: TextView
     private lateinit var reloadButton: Button
     private lateinit var progressBar: ProgressBar
+    private lateinit var trackInteractor: TrackInteractor
 
-    private val iTunesBaseUrl = "https://itunes.apple.com"
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(iTunesBaseUrl)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-    private val iTunesService = retrofit.create(ITunesAPI::class.java)
+
     private var searchQuery: String = ""
     private var trackList = ArrayList<Track>()
     private var historyList = SearchHistory.load()
-    private val SEARCH_QUERY_STATE_KEY = "search_query"
     private val searchAdapter = TrackAdapter(this, trackList, this)
     private val historyAdapter = TrackAdapter(this, historyList, this)
     private var isClickAllowed = true
@@ -64,9 +59,13 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
         setupUI()
+        trackInteractor = Creator.provideTrackInteractor()
         backButton.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
         clearSearchButton.setOnClickListener { clearSearchField() }
-        reloadButton.setOnClickListener { performSearch() }
+        reloadButton.setOnClickListener {
+            errorLayout.visibility = View.GONE
+            performSearch()
+        }
 
         clearHistoryButton.setOnClickListener {
             historyList.clear()
@@ -124,33 +123,40 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putString(SEARCH_QUERY_STATE_KEY, searchQuery)
+        outState.putString(Companion.SEARCH_QUERY_STATE_KEY, searchQuery)
     }
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        searchQuery = savedInstanceState.getString(SEARCH_QUERY_STATE_KEY, "")
+        searchQuery = savedInstanceState.getString(Companion.SEARCH_QUERY_STATE_KEY, "")
         searchField.setText(searchQuery)
     }
     private fun performSearch() {
         val searchText = searchField.text.toString().trim()
         if (searchText.isEmpty()) return
         progressBar.visibility = View.VISIBLE
-        iTunesService.search(searchText).enqueue(object : Callback<SearchResponse> {
-            override fun onResponse(call: Call<SearchResponse>, response: Response<SearchResponse>) {
-                val results = response.body()?.results.orEmpty()
-                trackList.clear()
-                trackList.addAll(results)
-                searchAdapter.notifyDataSetChanged()
-                progressBar.visibility = View.GONE
-                if (trackList.isEmpty()) {
-                    showNoDataFound()
-                } else {
-                    showSearchSuccess()
+
+        trackInteractor.searchTracks(searchText, object : TrackInteractor.TrackConsumer {
+            override fun consume(foundTracks: List<Track>) {
+                val updateTrackListRunnable = Runnable {
+                    progressBar.visibility = View.GONE
+                    trackList.clear()
+                    if (foundTracks.isEmpty()) {
+                        showNoDataFound()
+                    } else {
+                        trackList.addAll(foundTracks)
+                        searchAdapter.notifyDataSetChanged()
+                        showSearchSuccess()
+                    }
                 }
+                handler.post(updateTrackListRunnable)
             }
-            override fun onFailure(call: Call<SearchResponse>, t: Throwable) {
-                progressBar.visibility = View.GONE
-                showConnectionError()
+
+            override fun onError(e: Exception) {
+                val errorRunnable = Runnable {
+                    progressBar.visibility = View.GONE
+                    showConnectionError()
+                }
+                handler.post(errorRunnable)
             }
         })
     }
@@ -224,5 +230,6 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
     companion object {
         private const val CLICK_DEBOUNCE_DELAY = 1000L
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
+        const private val SEARCH_QUERY_STATE_KEY = "search_query"
     }
 }
