@@ -1,4 +1,4 @@
-
+package com.example.playlistmaker.ui.search
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -10,11 +10,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
-import com.example.playlistmaker.SearchHistory
-import com.example.playlistmaker.Track
-import com.example.playlistmaker.TrackInteractionListener
-import java.text.SimpleDateFormat
-import java.util.Locale
+import com.example.playlistmaker.domain.api.TrackInteractionListener
+import com.example.playlistmaker.domain.models.Track
 
 class TrackAdapter(private val context: Context, private val tracks: List<Track>, private val interactionListener: TrackInteractionListener) :
     RecyclerView.Adapter<TrackAdapter.TrackViewHolder>() {
@@ -28,7 +25,7 @@ class TrackAdapter(private val context: Context, private val tracks: List<Track>
         fun bind(track: Track) {
             trackNameTextView.text = track.trackName
             artistNameTextView.text = track.artistName
-            trackTimeTextView.text = SimpleDateFormat("mm:ss", Locale.getDefault()).format(track.trackTimeMillis)
+            trackTimeTextView.text = track.trackTimeMillis
             Glide.with(itemView.context)
                 .load(track.artworkUrl100)
                 .placeholder(R.drawable.ic_search_placeholder)
