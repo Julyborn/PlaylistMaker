@@ -1,4 +1,4 @@
-package com.example.playlistmaker
+package com.example.playlistmaker.ui.player
 
 import android.media.MediaPlayer
 import android.os.Bundle
@@ -12,6 +12,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.example.playlistmaker.R
+import com.example.playlistmaker.domain.models.Track
 import com.google.gson.Gson
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -82,7 +84,7 @@ class PlayerActivity : AppCompatActivity() {
         titleName.text = track.trackName
         artistName.text = track.artistName
         loadImage(track.artworkUrl100)
-        trackLength.text = SimpleDateFormat("mm:ss", Locale.getDefault()).format(track.trackTimeMillis)
+        trackLength.text = track.trackTimeMillis
         updateAlbumVisibility(track.collectionName)
         trackYear.text = extractYear(track.releaseDate)
         trackStyle.text = track.primaryGenreName
