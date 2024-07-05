@@ -23,8 +23,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.R
 import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.player.ui.PlayerActivity
-import com.example.playlistmaker.search.data.TrackHistoryRepositoryImpl
-import com.example.playlistmaker.search.domain.TrackInteractionListener
+import com.example.playlistmaker.search.domain.Interfaces.TrackInteractionListener
 import com.example.playlistmaker.search.domain.models.Track
 import com.example.playlistmaker.search.domain.models.TracksState
 import com.example.playlistmaker.search.presentation.SearchViewModel
@@ -63,9 +62,10 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
         handler = Handler(Looper.getMainLooper())
 
         val trackInteractor = Creator.provideTrackInteractor()
-        val trackHistoryRepository = TrackHistoryRepositoryImpl()
-        viewModel = ViewModelProvider(this, SearchViewModelFactory(applicationContext, trackInteractor, trackHistoryRepository)).get(
+        val trackHistoryInteractor = Creator.provideTrackHistoryInteractor()
+        viewModel = ViewModelProvider(this, SearchViewModelFactory(trackInteractor, trackHistoryInteractor)).get(
             SearchViewModel::class.java)
+
 
         backButton.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
         clearSearchButton.setOnClickListener { clearSearchField() }
@@ -89,6 +89,7 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(searchText: CharSequence?, start: Int, before: Int, count: Int) {
                 clearSearchButton.visibility = if (searchText.isNullOrEmpty()) View.GONE else View.VISIBLE
+                historyLayout.visibility = if (searchText.isNullOrEmpty()) View.VISIBLE else View.GONE
                 searchDebounce()
             }
             override fun afterTextChanged(s: Editable?) {}

@@ -3,6 +3,7 @@ package com.example.playlistmaker
 import android.app.Application
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
+import com.example.playlistmaker.creator.Creator
 
 class App : Application(){
     companion object {
@@ -13,6 +14,7 @@ class App : Application(){
 
     override fun onCreate() {
         super.onCreate()
+        Creator.initApplication(this)
         sharedPreferences = getSharedPreferences(APPLICATION_PREFERENCES, MODE_PRIVATE)
         val darkTheme = sharedPreferences.getBoolean(DARK_THEME, false)
         AppCompatDelegate.setDefaultNightMode(

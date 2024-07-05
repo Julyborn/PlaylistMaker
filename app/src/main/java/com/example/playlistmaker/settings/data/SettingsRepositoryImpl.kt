@@ -1,9 +1,9 @@
 package com.example.playlistmaker.settings.data
 
-import android.content.Context
 import com.example.playlistmaker.App
+import com.example.playlistmaker.settings.domain.SettingsRepository
 
-class SettingsRepositoryImpl(private val context: Context) : SettingsRepository {
+class SettingsRepositoryImpl : SettingsRepository {
 
     override fun isDarkThemeEnabled(): Boolean {
         return App.sharedPreferences.getBoolean(App.DARK_THEME, false)

@@ -5,6 +5,7 @@ import android.util.Log
 import com.example.playlistmaker.search.data.dto.TrackSearchRequest
 import com.example.playlistmaker.search.data.dto.TrackSearchResponse
 import com.example.playlistmaker.search.data.dto.network.NetworkClient
+import com.example.playlistmaker.search.domain.Interfaces.TrackRepository
 import com.example.playlistmaker.search.domain.models.Track
 import java.util.Locale
 

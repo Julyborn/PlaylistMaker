@@ -6,12 +6,18 @@ import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.playlistmaker.R
+import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.player.domain.PlayerInteractor
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 class PlayerViewModel(private val playerInteractor: PlayerInteractor) : ViewModel() {
     private val _playTime = MutableLiveData<String>()
+    private val dateFormat by lazy { SimpleDateFormat("mm:ss", Locale.getDefault()) }
+    private val app = Creator.application
+
+
     val playTime: LiveData<String> get() = _playTime
 
     private val _isPlaying = MutableLiveData<Boolean>()
@@ -31,7 +37,7 @@ class PlayerViewModel(private val playerInteractor: PlayerInteractor) : ViewMode
         }
         playerInteractor.setOnCompletionListener {
             _isPlaying.value = false
-            _playTime.value = "00:00"
+            _playTime.value = app.getString(R.string.time_placeholder)
             handler.removeCallbacks(updatePlayTimeRunnable)
             startPlayer()
         }
@@ -59,8 +65,7 @@ class PlayerViewModel(private val playerInteractor: PlayerInteractor) : ViewMode
     }
 
     private fun updatePlayTime() {
-        val formattedTime = SimpleDateFormat("mm:ss", Locale.getDefault()).format(playerInteractor.getCurrentPosition())
-        _playTime.value = formattedTime
+        _playTime.value = dateFormat.format(playerInteractor.getCurrentPosition())
     }
 }
 

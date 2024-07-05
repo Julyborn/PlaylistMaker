@@ -11,8 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
-import com.example.playlistmaker.player.data.PlayerRepositoryImpl
-import com.example.playlistmaker.player.domain.PlayerInteractorImpl
+import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.player.presentation.PlayerViewModel
 import com.example.playlistmaker.player.presentation.PlayerViewModelFactory
 import com.example.playlistmaker.search.domain.models.Track
@@ -46,8 +45,7 @@ class PlayerActivity : AppCompatActivity() {
 
         initializeViews()
 
-        val repository = PlayerRepositoryImpl()
-        val interactor = PlayerInteractorImpl(repository)
+        val interactor = Creator.providePlayerInteractor()
         val factory = PlayerViewModelFactory(interactor)
 
         viewModel = ViewModelProvider(this, factory).get(PlayerViewModel::class.java)

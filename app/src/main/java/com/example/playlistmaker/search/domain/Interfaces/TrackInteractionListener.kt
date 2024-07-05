@@ -1,4 +1,4 @@
-package com.example.playlistmaker.search.domain
+package com.example.playlistmaker.search.domain.Interfaces
 
 import com.example.playlistmaker.search.domain.models.Track
 

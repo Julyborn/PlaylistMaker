@@ -9,6 +9,7 @@
     <string name="users_assignment">Пользовательское соглашение</string>
     <string name="construction">Функция появится позже</string>
     <string name="course_link">https://practicum.yandex.ru/android-developer/</string>
+    <string name="share_app_template">Share this app: %1$s</string>
     <string name="support_email">ju1yborn@yandex.ru</string>
     <string name="email_subject_to_support">Сообщение разработчикам и разработчицам приложения Playlist Maker</string>
     <string name="email_message_to_support">Спасибо разработчикам и разработчицам за крутое приложение!</string>

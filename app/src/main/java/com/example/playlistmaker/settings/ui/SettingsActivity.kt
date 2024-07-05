@@ -17,13 +17,12 @@ import com.example.playlistmaker.settings.presentation.SettingsViewModelFactory
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var viewModel: SettingsViewModel
-    private var isInitialSetup = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        val settingsInteractor = Creator.provideSettingsInteractor(this)
+        val settingsInteractor = Creator.provideSettingsInteractor()
         val viewModelFactory = SettingsViewModelFactory(settingsInteractor)
         viewModel = ViewModelProvider(this, viewModelFactory).get(SettingsViewModel::class.java)
 
@@ -56,12 +55,6 @@ class SettingsActivity : AppCompatActivity() {
         agreementButton.setOnClickListener {
             openUserAgreement()
         }
-    }
-
-    private fun restartActivity() {
-        val intent = Intent(this, SettingsActivity::class.java)
-        finish()
-        startActivity(intent)
     }
 
     private fun shareApp() {
