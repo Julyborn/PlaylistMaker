@@ -8,23 +8,17 @@ import android.widget.ImageView
 import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.example.playlistmaker.R
-import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.settings.presentation.SettingsViewModel
-import com.example.playlistmaker.settings.presentation.SettingsViewModelFactory
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SettingsActivity : AppCompatActivity() {
 
-    private lateinit var viewModel: SettingsViewModel
+    private val viewModel: SettingsViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
-
-        val settingsInteractor = Creator.provideSettingsInteractor()
-        val viewModelFactory = SettingsViewModelFactory(settingsInteractor)
-        viewModel = ViewModelProvider(this, viewModelFactory).get(SettingsViewModel::class.java)
 
         val backButton = findViewById<ImageView>(R.id.back_button)
         backButton.setOnClickListener {

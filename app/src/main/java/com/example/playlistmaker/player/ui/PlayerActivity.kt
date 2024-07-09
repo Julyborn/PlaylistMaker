@@ -1,5 +1,6 @@
 package com.example.playlistmaker.player.ui
 
+
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
@@ -7,18 +8,14 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
-import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.player.presentation.PlayerViewModel
-import com.example.playlistmaker.player.presentation.PlayerViewModelFactory
 import com.example.playlistmaker.search.domain.models.Track
 import com.google.gson.Gson
-
-
-
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
 class PlayerActivity : AppCompatActivity() {
 
@@ -35,20 +32,17 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var playButton: ImageButton
     private lateinit var playerTimer: TextView
 
-    private lateinit var viewModel: PlayerViewModel
-
     private val radius by lazy { 8 * resources.displayMetrics.density }
+
+    private val viewModel: PlayerViewModel by viewModel {
+        parametersOf(Gson().fromJson(intent.extras?.getString("track"), Track::class.java))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
 
         initializeViews()
-
-        val interactor = Creator.providePlayerInteractor()
-        val factory = PlayerViewModelFactory(interactor)
-
-        viewModel = ViewModelProvider(this, factory).get(PlayerViewModel::class.java)
 
         val track = Gson().fromJson(intent.extras?.getString("track"), Track::class.java)
         updateUIWithTrackInfo(track)
