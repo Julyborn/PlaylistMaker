@@ -69,6 +69,7 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
 
         clearHistoryButton.setOnClickListener {
             viewModel.clearSearchHistory()
+            historyLayout.visibility = View.GONE
         }
 
         searchField.setOnEditorActionListener { _, actionId, _ ->
@@ -111,9 +112,9 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
         viewModel.tracksState.observe(this, Observer { tracksState ->
             render(tracksState)
         })
-        viewModel.historyList.observe(this, Observer { tracks ->
-            historyAdapter.updateTracks(tracks)
-            if (searchField.hasFocus() && searchField.text.isEmpty() && tracks.isNotEmpty()) {
+        viewModel.historyList.observe(this, Observer { historytracks ->
+            historyAdapter.updateTracks(historytracks)
+            if (searchField.hasFocus() && searchField.text.isEmpty() && historytracks.isNotEmpty()) {
                 showHistory()
             }
         })
@@ -123,6 +124,7 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
         val searchText = searchField.text.toString().trim()
         if (searchText.isNotEmpty()) {
             errorLayout.visibility = View.GONE
+            historyLayout.visibility = View.GONE
             viewModel.searchTracks(searchText)
         }
     }
@@ -144,9 +146,13 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
     }
 
     private fun clearSearchField() {
+        historyLayout.visibility = View.GONE
         searchField.text.clear()
         val hideKeyboard = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         hideKeyboard.hideSoftInputFromWindow(searchField.windowToken, 0)
+        searchRecyclerView.visibility = View.GONE
+
+
     }
 
     override fun onTrackSelected(track: Track) {
@@ -198,6 +204,7 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
 
     private fun showSearchSuccess() {
         errorLayout.visibility = View.GONE
+        historyLayout.visibility = View.GONE
         searchRecyclerView.visibility = View.VISIBLE
     }
 
