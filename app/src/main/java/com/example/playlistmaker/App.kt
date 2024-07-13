@@ -3,18 +3,27 @@ package com.example.playlistmaker
 import android.app.Application
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
-import com.example.playlistmaker.creator.Creator
+import com.example.playlistmaker.di.playerModule
+import com.example.playlistmaker.di.searchModule
+import com.example.playlistmaker.di.settingsModule
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.context.startKoin
 
 class App : Application(){
     companion object {
         const val DARK_THEME = "dark_theme_key"
         const val APPLICATION_PREFERENCES = "application_preferences"
         lateinit var sharedPreferences: SharedPreferences
+        const val BASE_URL = "https://itunes.apple.com"
+        const val HISTORY_TRACK_LIST_KEY = "KEY_FOR_HISTORY_LIST"
     }
 
     override fun onCreate() {
         super.onCreate()
-        Creator.initApplication(this)
+        startKoin {
+            androidContext(this@App)
+            modules(playerModule, searchModule, settingsModule)
+        }
         sharedPreferences = getSharedPreferences(APPLICATION_PREFERENCES, MODE_PRIVATE)
         val darkTheme = sharedPreferences.getBoolean(DARK_THEME, false)
         AppCompatDelegate.setDefaultNightMode(

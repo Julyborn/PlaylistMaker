@@ -17,22 +17,21 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.R
-import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.player.ui.PlayerActivity
 import com.example.playlistmaker.search.domain.Interfaces.TrackInteractionListener
 import com.example.playlistmaker.search.domain.models.Track
 import com.example.playlistmaker.search.domain.models.TracksState
 import com.example.playlistmaker.search.presentation.SearchViewModel
-import com.example.playlistmaker.search.presentation.SearchViewModelFactory
 import com.google.gson.Gson
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchActivity : AppCompatActivity(), TrackInteractionListener {
 
-    private lateinit var viewModel: SearchViewModel
+    private val viewModel: SearchViewModel by viewModel()
     // UI Elements
     private lateinit var searchField: EditText
     private lateinit var backButton: ImageView
@@ -54,18 +53,13 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
     private lateinit var handler: Handler
     private val searchRunnable = Runnable { performSearch() }
     private val SEARCH_DEBOUNCE_DELAY = 2000L
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
         setupUI()
 
         handler = Handler(Looper.getMainLooper())
-
-        val trackInteractor = Creator.provideTrackInteractor()
-        val trackHistoryInteractor = Creator.provideTrackHistoryInteractor()
-        viewModel = ViewModelProvider(this, SearchViewModelFactory(trackInteractor, trackHistoryInteractor)).get(
-            SearchViewModel::class.java)
-
 
         backButton.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
         clearSearchButton.setOnClickListener { clearSearchField() }
@@ -75,6 +69,7 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
 
         clearHistoryButton.setOnClickListener {
             viewModel.clearSearchHistory()
+            historyLayout.visibility = View.GONE
         }
 
         searchField.setOnEditorActionListener { _, actionId, _ ->
@@ -114,21 +109,22 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
     }
 
     private fun observeViewModel() {
-        viewModel.tracksState.observe(this) { tracksState ->
+        viewModel.tracksState.observe(this, Observer { tracksState ->
             render(tracksState)
-        }
-        viewModel.historyList.observe(this) { tracks ->
-            historyAdapter.updateTracks(tracks)
-            if (searchField.hasFocus() && searchField.text.isEmpty() && tracks.isNotEmpty()) {
+        })
+        viewModel.historyList.observe(this, Observer { historytracks ->
+            historyAdapter.updateTracks(historytracks)
+            if (searchField.hasFocus() && searchField.text.isEmpty() && historytracks.isNotEmpty()) {
                 showHistory()
             }
-        }
+        })
     }
 
     private fun performSearch() {
         val searchText = searchField.text.toString().trim()
         if (searchText.isNotEmpty()) {
             errorLayout.visibility = View.GONE
+            historyLayout.visibility = View.GONE
             viewModel.searchTracks(searchText)
         }
     }
@@ -150,9 +146,13 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
     }
 
     private fun clearSearchField() {
+        historyLayout.visibility = View.GONE
         searchField.text.clear()
         val hideKeyboard = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         hideKeyboard.hideSoftInputFromWindow(searchField.windowToken, 0)
+        searchRecyclerView.visibility = View.GONE
+
+
     }
 
     override fun onTrackSelected(track: Track) {
@@ -167,8 +167,6 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
         handler.removeCallbacks(searchRunnable)
         handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
     }
-
-
 
     private fun render(tracksState: TracksState) {
         when {
@@ -193,6 +191,7 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
             }
         }
     }
+
     private fun showLoading(isLoading: Boolean) {
         progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
     }
@@ -202,10 +201,13 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
         searchRecyclerView.visibility = View.GONE
         errorLayout.visibility = View.GONE
     }
+
     private fun showSearchSuccess() {
         errorLayout.visibility = View.GONE
+        historyLayout.visibility = View.GONE
         searchRecyclerView.visibility = View.VISIBLE
     }
+
     private fun showNoDataFound() {
         searchRecyclerView.visibility = View.GONE
         errorLayout.visibility = View.VISIBLE
@@ -214,6 +216,7 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
         errorText.setText(R.string.no_data_found)
         reloadButton.visibility = View.GONE
     }
+
     private fun showConnectionError() {
         searchRecyclerView.visibility = View.GONE
         errorLayout.visibility = View.VISIBLE

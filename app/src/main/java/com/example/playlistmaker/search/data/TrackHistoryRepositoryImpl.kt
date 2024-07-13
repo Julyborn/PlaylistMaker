@@ -1,6 +1,7 @@
 package com.example.playlistmaker.search.data
 
 import com.example.playlistmaker.App
+import com.example.playlistmaker.App.Companion.HISTORY_TRACK_LIST_KEY
 import com.example.playlistmaker.search.domain.Interfaces.TrackHistoryRepository
 import com.example.playlistmaker.search.domain.models.Track
 import com.google.gson.Gson
@@ -9,7 +10,6 @@ import com.google.gson.reflect.TypeToken
 
 class TrackHistoryRepositoryImpl : TrackHistoryRepository {
     companion object {
-        private const val HISTORY_TRACK_LIST_KEY = "history_key"
         private const val MAX_HISTORY_SIZE = 10
         private val gson = Gson()
     }
