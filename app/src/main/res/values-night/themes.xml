@@ -18,4 +18,7 @@
         <item name="android:backgroundTint">@color/white</item>
         <item name="android:fontFamily">@font/ys_display_regular</item>
     </style>
+    <style name="divider">
+        <item name="android:background">@color/gray_light</item>
+    </style>
 </resources>
