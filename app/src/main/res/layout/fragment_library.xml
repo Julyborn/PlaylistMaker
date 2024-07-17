@@ -11,19 +11,11 @@
         android:layout_height="56dp"
         android:background="?attr/colorSecondaryVariant">
 
-        <ImageView
-            android:id="@+id/back_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            app:srcCompat="@drawable/ic_arrow_back" />
-
         <TextView
             android:id="@+id/library_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="28dp"
+            android:layout_marginStart="4dp"
             android:layout_marginTop="16dp"
             android:fontFamily="@font/ys_display_medium"
             android:text="@string/library"
