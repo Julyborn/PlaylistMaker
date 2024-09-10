@@ -7,7 +7,9 @@ import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
@@ -16,7 +18,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,12 +31,11 @@ import com.example.playlistmaker.search.presentation.SearchViewModel
 import com.google.gson.Gson
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class SearchActivity : AppCompatActivity(), TrackInteractionListener {
+class SearchFragment : Fragment(), TrackInteractionListener {
 
     private val viewModel: SearchViewModel by viewModel()
     // UI Elements
     private lateinit var searchField: EditText
-    private lateinit var backButton: ImageView
     private lateinit var clearSearchButton: ImageView
     private lateinit var searchRecyclerView: RecyclerView
     private lateinit var historyRecyclerView: RecyclerView
@@ -54,14 +55,19 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
     private val searchRunnable = Runnable { performSearch() }
     private val SEARCH_DEBOUNCE_DELAY = 2000L
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_search)
-        setupUI()
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_search, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupUI(view)
 
         handler = Handler(Looper.getMainLooper())
 
-        backButton.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
         clearSearchButton.setOnClickListener { clearSearchField() }
         reloadButton.setOnClickListener {
             performSearch()
@@ -90,10 +96,10 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        historyRecyclerView.layoutManager = LinearLayoutManager(this)
+        historyRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         historyRecyclerView.adapter = historyAdapter
 
-        searchRecyclerView.layoutManager = LinearLayoutManager(this)
+        searchRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         searchRecyclerView.adapter = searchAdapter
 
         observeViewModel()
@@ -109,12 +115,12 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
     }
 
     private fun observeViewModel() {
-        viewModel.tracksState.observe(this, Observer { tracksState ->
+        viewModel.tracksState.observe(viewLifecycleOwner, Observer { tracksState ->
             render(tracksState)
         })
-        viewModel.historyList.observe(this, Observer { historytracks ->
-            historyAdapter.updateTracks(historytracks)
-            if (searchField.hasFocus() && searchField.text.isEmpty() && historytracks.isNotEmpty()) {
+        viewModel.historyList.observe(viewLifecycleOwner, Observer { historyTracks ->
+            historyAdapter.updateTracks(historyTracks)
+            if (searchField.hasFocus() && searchField.text.isEmpty() && historyTracks.isNotEmpty()) {
                 showHistory()
             }
         })
@@ -129,35 +135,32 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
         }
     }
 
-    private fun setupUI() {
-        progressBar = findViewById(R.id.progressBar)
-        clearHistoryButton = findViewById(R.id.clear_history_button)
-        historyLayout = findViewById(R.id.history_layout)
-        errorLayout = findViewById(R.id.error_layout)
-        errorImage = findViewById(R.id.error_img)
-        errorText = findViewById(R.id.error_text)
-        errorSubText = findViewById(R.id.error_sub_text)
-        reloadButton = findViewById(R.id.reload_btn)
-        clearSearchButton = findViewById(R.id.clearButton)
-        backButton = findViewById(R.id.back_button)
-        searchField = findViewById(R.id.search_edit_text)
-        searchRecyclerView = findViewById(R.id.search_results)
-        historyRecyclerView = findViewById(R.id.history_recyclerview)
+    private fun setupUI(view: View) {
+        progressBar = view.findViewById(R.id.progressBar)
+        clearHistoryButton = view.findViewById(R.id.clear_history_button)
+        historyLayout = view.findViewById(R.id.history_layout)
+        errorLayout = view.findViewById(R.id.error_layout)
+        errorImage = view.findViewById(R.id.error_img)
+        errorText = view.findViewById(R.id.error_text)
+        errorSubText = view.findViewById(R.id.error_sub_text)
+        reloadButton = view.findViewById(R.id.reload_btn)
+        clearSearchButton = view.findViewById(R.id.clearButton)
+        searchField = view.findViewById(R.id.search_edit_text)
+        searchRecyclerView = view.findViewById(R.id.search_results)
+        historyRecyclerView = view.findViewById(R.id.history_recyclerview)
     }
 
     private fun clearSearchField() {
         historyLayout.visibility = View.GONE
         searchField.text.clear()
-        val hideKeyboard = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val hideKeyboard = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         hideKeyboard.hideSoftInputFromWindow(searchField.windowToken, 0)
         searchRecyclerView.visibility = View.GONE
-
-
     }
 
     override fun onTrackSelected(track: Track) {
         viewModel.addTrackToHistory(track)
-        val intent = Intent(this, PlayerActivity::class.java).apply {
+        val intent = Intent(requireContext(), PlayerActivity::class.java).apply {
             putExtra("track", Gson().toJson(track))
         }
         startActivity(intent)
@@ -227,8 +230,14 @@ class SearchActivity : AppCompatActivity(), TrackInteractionListener {
         reloadButton.visibility = View.VISIBLE
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         handler.removeCallbacksAndMessages(null)
+    }
+
+    companion object {
+        fun newInstance(): SearchFragment {
+            return SearchFragment()
+        }
     }
 }
