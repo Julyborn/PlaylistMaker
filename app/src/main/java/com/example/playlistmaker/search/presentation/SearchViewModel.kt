@@ -1,67 +1,82 @@
 package com.example.playlistmaker.search.presentation
 
-
-import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.playlistmaker.search.domain.Interfaces.TrackHistoryInteractor
 import com.example.playlistmaker.search.domain.Interfaces.TrackInteractor
 import com.example.playlistmaker.search.domain.models.Track
 import com.example.playlistmaker.search.domain.models.TracksState
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 class SearchViewModel(
     private val trackInteractor: TrackInteractor,
     private val trackHistoryInteractor: TrackHistoryInteractor
 ) : ViewModel() {
 
-    private val _tracksState = MutableLiveData<TracksState>()
-    val tracksState: LiveData<TracksState> get() = _tracksState
+    private val _tracksState = MutableStateFlow<TracksState>(
+        TracksState(isLoading = false, isFailed = null, emptyList())
+    )
+    val tracksState: StateFlow<TracksState> get() = _tracksState
 
-    private val _historyList = MutableLiveData<List<Track>>()
-    val historyList: LiveData<List<Track>> get() = _historyList
+    private val _historyList = MutableStateFlow<List<Track>>(emptyList())
+    val historyList: StateFlow<List<Track>> get() = _historyList
 
-    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
+    private var searchJob: Job? = null
+    private var lastRequest: String? = null
+    private val SEARCH_DEBOUNCE_DELAY = 2000L
 
     fun searchTracks(query: String) {
-        val tracks = mutableListOf<Track>()
-        if (query.isNotEmpty()) {
-            _tracksState.postValue(
-                TracksState(
-                    tracks = emptyList(),
-                    isLoading = true,
-                    isFailed = null
-                )
+        if (query.isEmpty() || query == lastRequest) {
+            return
+        }
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            _tracksState.value = TracksState(
+                tracks = emptyList(),
+                isLoading = true,
+                isFailed = null
             )
-
-            trackInteractor.searchTracks(query, object : TrackInteractor.TrackConsumer {
-                override fun consume(foundTracks: List<Track>) {
-                    handler.post {
-                        tracks.clear()
-                        tracks.addAll(foundTracks)
-                        _tracksState.postValue(
-                            TracksState(
-                                tracks = tracks,
-                                isLoading = false,
-                                isFailed = null
-                            )
+            lastRequest = query
+            trackInteractor.searchTracks(query)
+                .onEach { tracks ->
+                    _tracksState.value = TracksState(
+                        tracks = tracks,
+                        isLoading = false,
+                        isFailed = null
+                    )
+                }
+                .catch { e ->
+                    if (e !is CancellationException) {
+                        val errorType = when (e) {
+                            is java.io.IOException -> true
+                            else -> false
+                        }
+                        _tracksState.value = TracksState(
+                            tracks = emptyList(),
+                            isLoading = false,
+                            isFailed = errorType
                         )
                     }
                 }
+                .launchIn(this)
+        }
+    }
 
-                override fun onError(e: Exception) {
-                    Log.e("SearchViewModel", "Error during searchTracks: ${e.message}")
-                    handler.post {
-                        _tracksState.postValue(
-                            TracksState(
-                                tracks = emptyList(),
-                                isLoading = false,
-                                isFailed = true
-                            )
-                        )
-                    }
-                }
-            })
+    fun searchDebounce(newRequest: String) {
+        if (newRequest == lastRequest) return
+
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            delay(SEARCH_DEBOUNCE_DELAY)
+            searchTracks(newRequest)
         }
     }
 

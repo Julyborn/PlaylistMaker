@@ -1,12 +1,14 @@
 package com.example.playlistmaker.player.presentation
 
 
-import android.os.Handler
-import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.playlistmaker.player.domain.PlayerInteractor
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -16,17 +18,19 @@ class PlayerViewModel(
 
     private val _playTime = MutableLiveData<String>()
     private val dateFormat by lazy { SimpleDateFormat("mm:ss", Locale.getDefault()) }
+    private var timerJob: Job? = null
 
     val playTime: LiveData<String> get() = _playTime
 
     private val _isPlaying = MutableLiveData<Boolean>()
     val isPlaying: LiveData<Boolean> get() = _isPlaying
-
-    private val handler = Handler(Looper.getMainLooper())
-    private val updatePlayTimeRunnable = object : Runnable {
-        override fun run() {
-            updatePlayTime()
-            handler.postDelayed(this, 1000)
+    private fun startProgressUpdate() {
+        timerJob?.cancel()
+        timerJob = viewModelScope.launch {
+            while (_isPlaying.value == true) {
+                updatePlayTime()
+                delay(300)
+            }
         }
     }
 
@@ -37,7 +41,6 @@ class PlayerViewModel(
         playerInteractor.setOnCompletionListener {
             _isPlaying.value = false
             _playTime.value = dateFormat.format(0)
-            handler.removeCallbacks(updatePlayTimeRunnable)
             startPlayer()
         }
     }
@@ -48,18 +51,17 @@ class PlayerViewModel(
     fun startPlayer() {
         playerInteractor.startPlayer()
         _isPlaying.value = true
-        handler.post(updatePlayTimeRunnable)
+        startProgressUpdate()
     }
 
     fun pausePlayer() {
         playerInteractor.pausePlayer()
         _isPlaying.value = false
-        handler.removeCallbacks(updatePlayTimeRunnable)
     }
 
     fun releasePlayer() {
         playerInteractor.releasePlayer()
-        handler.removeCallbacks(updatePlayTimeRunnable)
+        startProgressUpdate()
     }
 
     private fun updatePlayTime() {

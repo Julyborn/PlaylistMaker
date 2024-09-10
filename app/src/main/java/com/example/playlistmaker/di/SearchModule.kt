@@ -40,7 +40,7 @@ val searchModule = module {
     }
 
     single<NetworkClient> {
-        RetrofitNetworkClient(context = androidContext(), iTunes = get())
+        RetrofitNetworkClient(iTunes = get())
     }
 
     single<TrackHistoryRepository> {

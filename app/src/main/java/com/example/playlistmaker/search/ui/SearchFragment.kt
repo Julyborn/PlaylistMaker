@@ -3,8 +3,6 @@ package com.example.playlistmaker.search.ui
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -19,7 +17,7 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.R
@@ -29,11 +27,15 @@ import com.example.playlistmaker.search.domain.models.Track
 import com.example.playlistmaker.search.domain.models.TracksState
 import com.example.playlistmaker.search.presentation.SearchViewModel
 import com.google.gson.Gson
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchFragment : Fragment(), TrackInteractionListener {
 
     private val viewModel: SearchViewModel by viewModel()
+
     // UI Elements
     private lateinit var searchField: EditText
     private lateinit var clearSearchButton: ImageView
@@ -50,10 +52,8 @@ class SearchFragment : Fragment(), TrackInteractionListener {
 
     private val searchAdapter = TrackAdapter(mutableListOf(), this)
     private val historyAdapter = TrackAdapter(mutableListOf(), this)
-
-    private lateinit var handler: Handler
-    private val searchRunnable = Runnable { performSearch() }
-    private val SEARCH_DEBOUNCE_DELAY = 2000L
+    private var isFirstRender = true
+    private var isClickAllowed = true
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -66,12 +66,8 @@ class SearchFragment : Fragment(), TrackInteractionListener {
         super.onViewCreated(view, savedInstanceState)
         setupUI(view)
 
-        handler = Handler(Looper.getMainLooper())
-
         clearSearchButton.setOnClickListener { clearSearchField() }
-        reloadButton.setOnClickListener {
-            performSearch()
-        }
+        reloadButton.setOnClickListener { performSearch() }
 
         clearHistoryButton.setOnClickListener {
             viewModel.clearSearchHistory()
@@ -82,16 +78,18 @@ class SearchFragment : Fragment(), TrackInteractionListener {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 performSearch()
                 true
+            } else {
+                false
             }
-            false
         }
 
         searchField.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(searchText: CharSequence?, start: Int, before: Int, count: Int) {
-                clearSearchButton.visibility = if (searchText.isNullOrEmpty()) View.GONE else View.VISIBLE
-                historyLayout.visibility = if (searchText.isNullOrEmpty()) View.VISIBLE else View.GONE
-                searchDebounce()
+                val isSearchTextEmpty = searchText.isNullOrEmpty()
+                clearSearchButton.visibility = if (isSearchTextEmpty) View.GONE else View.VISIBLE
+                showHistory(isSearchTextEmpty)
+                viewModel.searchDebounce(searchText.toString())
             }
             override fun afterTextChanged(s: Editable?) {}
         })
@@ -106,31 +104,32 @@ class SearchFragment : Fragment(), TrackInteractionListener {
         viewModel.loadSearchHistory()
 
         searchField.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus && searchField.text.isEmpty() && viewModel.historyList.value?.isNotEmpty() == true) {
-                showHistory()
-            } else {
-                historyLayout.visibility = View.GONE
-            }
+            val shouldShowHistory = hasFocus && searchField.text.isEmpty()
+            showHistory(shouldShowHistory)
         }
     }
 
     private fun observeViewModel() {
-        viewModel.tracksState.observe(viewLifecycleOwner, Observer { tracksState ->
-            render(tracksState)
-        })
-        viewModel.historyList.observe(viewLifecycleOwner, Observer { historyTracks ->
-            historyAdapter.updateTracks(historyTracks)
-            if (searchField.hasFocus() && searchField.text.isEmpty() && historyTracks.isNotEmpty()) {
-                showHistory()
+        lifecycleScope.launch {
+            viewModel.tracksState.collectLatest { tracksState ->
+                render(tracksState)
             }
-        })
+        }
+
+        lifecycleScope.launch {
+            viewModel.historyList.collectLatest { historyTracks ->
+                historyAdapter.updateTracks(historyTracks)
+                if (searchField.hasFocus() && searchField.text.isEmpty()) {
+                    showHistory(true)
+                }
+            }
+        }
     }
 
     private fun performSearch() {
         val searchText = searchField.text.toString().trim()
         if (searchText.isNotEmpty()) {
-            errorLayout.visibility = View.GONE
-            historyLayout.visibility = View.GONE
+            showNothing()
             viewModel.searchTracks(searchText)
         }
     }
@@ -149,13 +148,23 @@ class SearchFragment : Fragment(), TrackInteractionListener {
         searchRecyclerView = view.findViewById(R.id.search_results)
         historyRecyclerView = view.findViewById(R.id.history_recyclerview)
     }
-
+    private fun clickDebounce() : Boolean {
+        val current = isClickAllowed
+        if (isClickAllowed) {
+            isClickAllowed = false
+            viewLifecycleOwner.lifecycleScope.launch {
+                delay(Companion.CLICK_DELAY)
+                isClickAllowed = true
+            }
+        }
+        return current
+    }
     private fun clearSearchField() {
-        historyLayout.visibility = View.GONE
+        showNothing()
         searchField.text.clear()
         val hideKeyboard = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         hideKeyboard.hideSoftInputFromWindow(searchField.windowToken, 0)
-        searchRecyclerView.visibility = View.GONE
+
     }
 
     override fun onTrackSelected(track: Track) {
@@ -166,29 +175,28 @@ class SearchFragment : Fragment(), TrackInteractionListener {
         startActivity(intent)
     }
 
-    private fun searchDebounce() {
-        handler.removeCallbacks(searchRunnable)
-        handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
-    }
-
     private fun render(tracksState: TracksState) {
+        if (isFirstRender) {
+            isFirstRender = false
+            return
+        }
         when {
             tracksState.isLoading -> showLoading(true)
             else -> {
                 showLoading(false)
                 if (tracksState.isFailed != null) {
                     when {
-                        tracksState.isFailed -> showConnectionError()
-                        else -> showNoDataFound()
+                        tracksState.isFailed -> showConnectionError(true)
+                        else -> showNoDataFound(true)
                     }
                 } else {
                     if (tracksState.tracks.isEmpty()) {
-                        showNoDataFound()
+                        showNoDataFound(true)
                     } else {
                         searchAdapter.tracks.clear()
                         searchAdapter.tracks.addAll(tracksState.tracks)
                         searchAdapter.notifyDataSetChanged()
-                        showSearchSuccess()
+                        showSearchSuccess(true)
                     }
                 }
             }
@@ -199,45 +207,68 @@ class SearchFragment : Fragment(), TrackInteractionListener {
         progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
     }
 
-    private fun showHistory() {
-        historyLayout.visibility = View.VISIBLE
-        searchRecyclerView.visibility = View.GONE
-        errorLayout.visibility = View.GONE
+    private fun showHistory(show: Boolean) {
+        if (show && viewModel.historyList.value.isNotEmpty()) {
+            searchRecyclerView.visibility = View.GONE
+            errorLayout.visibility = View.GONE
+            historyLayout.visibility = View.VISIBLE
+        }
+        else
+            historyLayout.visibility = View.GONE
     }
 
-    private fun showSearchSuccess() {
-        errorLayout.visibility = View.GONE
-        historyLayout.visibility = View.GONE
-        searchRecyclerView.visibility = View.VISIBLE
+    private fun showSearchSuccess(show: Boolean) {
+        if (show) {
+            errorLayout.visibility = View.GONE
+            historyLayout.visibility = View.GONE
+            searchRecyclerView.visibility = View.VISIBLE
+        }
+        else {
+            searchRecyclerView.visibility = View.GONE
+        }
     }
 
-    private fun showNoDataFound() {
-        searchRecyclerView.visibility = View.GONE
-        errorLayout.visibility = View.VISIBLE
-        errorImage.setImageResource(R.drawable.no_data_found)
-        errorSubText.visibility = View.GONE
-        errorText.setText(R.string.no_data_found)
-        reloadButton.visibility = View.GONE
+    private fun showNoDataFound(show: Boolean) {
+        if (show) {
+            searchRecyclerView.visibility = View.GONE
+            errorSubText.visibility = View.GONE
+            reloadButton.visibility = View.GONE
+            errorImage.setImageResource(R.drawable.no_data_found)
+            errorText.setText(R.string.no_data_found)
+            errorLayout.visibility = View.VISIBLE
+
+        }
+        else{
+            errorLayout.visibility = View.GONE
+        }
     }
 
-    private fun showConnectionError() {
-        searchRecyclerView.visibility = View.GONE
-        errorLayout.visibility = View.VISIBLE
-        errorImage.setImageResource(R.drawable.connection_error)
-        errorSubText.visibility = View.VISIBLE
-        errorText.setText(R.string.connection_error)
-        errorSubText.setText(R.string.check_connection)
-        reloadButton.visibility = View.VISIBLE
-    }
+    private fun showConnectionError(show: Boolean) {
+        if (show) {
+            searchRecyclerView.visibility = View.GONE
+            errorImage.setImageResource(R.drawable.connection_error)
+            errorText.setText(R.string.connection_error)
+            errorSubText.setText(R.string.check_connection)
+            errorLayout.visibility = View.VISIBLE
+            errorSubText.visibility = View.VISIBLE
+            reloadButton.visibility = View.VISIBLE
+        }
+        else {
+            errorLayout.visibility = View.GONE
+        }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        handler.removeCallbacksAndMessages(null)
+    }
+    private fun showNothing() {
+        showLoading(false)
+        showHistory(false)
+        showSearchSuccess(false)
+        showNoDataFound(false)
+        showConnectionError(false)
     }
 
     companion object {
-        fun newInstance(): SearchFragment {
-            return SearchFragment()
-        }
+        private const val CLICK_DELAY = 1000L
     }
+
+
 }
