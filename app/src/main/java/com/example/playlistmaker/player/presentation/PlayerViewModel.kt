@@ -41,7 +41,6 @@ class PlayerViewModel(
         playerInteractor.setOnCompletionListener {
             _isPlaying.value = false
             _playTime.value = dateFormat.format(0)
-            startPlayer()
         }
     }
     fun preparePlayer(url: String) {

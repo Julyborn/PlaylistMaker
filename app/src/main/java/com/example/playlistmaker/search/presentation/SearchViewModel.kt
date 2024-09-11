@@ -16,14 +16,13 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
+
 class SearchViewModel(
     private val trackInteractor: TrackInteractor,
     private val trackHistoryInteractor: TrackHistoryInteractor
 ) : ViewModel() {
 
-    private val _tracksState = MutableStateFlow<TracksState>(
-        TracksState(isLoading = false, isFailed = null, emptyList())
-    )
+    private val _tracksState = MutableStateFlow<TracksState>(TracksState.Empty)
     val tracksState: StateFlow<TracksState> get() = _tracksState
 
     private val _historyList = MutableStateFlow<List<Track>>(emptyList())
@@ -39,31 +38,20 @@ class SearchViewModel(
         }
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
-            _tracksState.value = TracksState(
-                tracks = emptyList(),
-                isLoading = true,
-                isFailed = null
-            )
+            _tracksState.value = TracksState.Loading
             lastRequest = query
             trackInteractor.searchTracks(query)
                 .onEach { tracks ->
-                    _tracksState.value = TracksState(
-                        tracks = tracks,
-                        isLoading = false,
-                        isFailed = null
-                    )
+                    _tracksState.value = if (tracks.isNotEmpty()) {
+                        TracksState.Success(tracks)
+                    } else {
+                        TracksState.Empty
+                    }
                 }
                 .catch { e ->
                     if (e !is CancellationException) {
-                        val errorType = when (e) {
-                            is java.io.IOException -> true
-                            else -> false
-                        }
-                        _tracksState.value = TracksState(
-                            tracks = emptyList(),
-                            isLoading = false,
-                            isFailed = errorType
-                        )
+                        val isNetworkError = e is java.io.IOException
+                        _tracksState.value = TracksState.Error(isNetworkError)
                     }
                 }
                 .launchIn(this)

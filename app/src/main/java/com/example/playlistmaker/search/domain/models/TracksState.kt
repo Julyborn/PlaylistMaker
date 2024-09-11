@@ -1,7 +1,8 @@
 package com.example.playlistmaker.search.domain.models
 
-data class TracksState(
-    val isLoading: Boolean = false,
-    val isFailed: Boolean? = null,
-    val tracks: List<Track> = emptyList()
-)
+sealed class TracksState {
+    object Loading : TracksState()
+    data class Success(val tracks: List<Track>) : TracksState()
+    data class Error(val isNetworkError: Boolean) : TracksState()
+    object Empty : TracksState()
+}
