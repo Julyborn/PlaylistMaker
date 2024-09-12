@@ -142,7 +142,7 @@ class SearchFragment : Fragment(), TrackInteractionListener {
     }
 
     private fun clickDebounce(click: () -> Unit) {
-        clickJob?.cancel()
+        if (clickJob?.isActive == true) return
         clickJob = viewLifecycleOwner.lifecycleScope.launch {
             click()
             delay(CLICK_DELAY)
