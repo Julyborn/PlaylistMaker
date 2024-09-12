@@ -7,6 +7,8 @@ import com.example.playlistmaker.di.libraryModule
 import com.example.playlistmaker.di.playerModule
 import com.example.playlistmaker.di.searchModule
 import com.example.playlistmaker.di.settingsModule
+import com.example.playlistmaker.library.data.di.dataModule
+import com.example.playlistmaker.library.data.di.repositoryModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -23,7 +25,7 @@ class App : Application(){
         super.onCreate()
         startKoin {
             androidContext(this@App)
-            modules(playerModule, searchModule, settingsModule, libraryModule)
+            modules(playerModule, searchModule, settingsModule, libraryModule, dataModule, repositoryModule,)
         }
         sharedPreferences = getSharedPreferences(APPLICATION_PREFERENCES, MODE_PRIVATE)
         val darkTheme = sharedPreferences.getBoolean(DARK_THEME, false)

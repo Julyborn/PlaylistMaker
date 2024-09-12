@@ -120,7 +120,7 @@
         app:layout_constraintDimensionRatio="1:1"/>
 
     <ImageButton
-        android:id="@+id/loved_but"
+        android:id="@+id/favorite_but"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@drawable/ic_favorite"
@@ -137,7 +137,7 @@
         android:background="@drawable/ic_play"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintStart_toEndOf="@+id/col_but"
-        app:layout_constraintEnd_toStartOf="@+id/loved_but"
+        app:layout_constraintEnd_toStartOf="@+id/favorite_but"
         app:layout_constraintTop_toBottomOf="@id/artist_name"
         app:layout_constraintBottom_toTopOf="@id/quarter_barier"
         app:layout_constraintVertical_bias="0.375"

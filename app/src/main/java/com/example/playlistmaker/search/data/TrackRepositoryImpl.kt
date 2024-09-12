@@ -23,8 +23,9 @@ class TrackRepositoryImpl(private val networkClient: NetworkClient) : TrackRepos
             val trackResponse = response as? TrackSearchResponse
             trackResponse?.let {
                 emit(it.results.map { trackDto ->
+                    Log.d("БД", "Трек в поиске: название ${trackDto.trackName}\" id ${trackDto.trackId}")
                     Track(
-                        trackDto.trackID,
+                        trackDto.trackId,
                         trackDto.trackName,
                         trackDto.artistName,
                         getTimeFormat(trackDto.trackTime.toLong()),
@@ -35,6 +36,7 @@ class TrackRepositoryImpl(private val networkClient: NetworkClient) : TrackRepos
                         trackDto.country,
                         trackDto.previewUrl
                     )
+
                 })
             } ?: Log.e("TrackRepositoryImpl", "Response casting error: expected TrackSearchResponse")
         } else {
