@@ -11,7 +11,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.playlistmaker.databinding.FragmentFavoritesLibraryBinding
-import com.example.playlistmaker.library.data.db.TrackEntity
 import com.example.playlistmaker.library.presentation.LibraryFavoritesViewModel
 import com.example.playlistmaker.player.ui.PlayerActivity
 import com.example.playlistmaker.search.domain.Interfaces.TrackInteractionListener
@@ -55,12 +54,12 @@ class LibraryFavoritesFragment : Fragment(), TrackInteractionListener {
         })
     }
 
-    private fun render(tracks: List<TrackEntity>) {
+    private fun render(tracks: List<Track>) {
         if (tracks.isEmpty()) {
             showNoFavoritesFound(true)
         } else {
             favoriteAdapter.tracks.clear()
-            favoriteAdapter.tracks.addAll(tracks.map { entity -> entity.toTrack() })
+            favoriteAdapter.tracks.addAll(tracks)
             favoriteAdapter.notifyDataSetChanged()
             showNoFavoritesFound(false)
         }
@@ -87,23 +86,6 @@ class LibraryFavoritesFragment : Fragment(), TrackInteractionListener {
             delay(CLICK_DELAY)
         }
     }
-
-    fun TrackEntity.toTrack(): Track {
-        return Track(
-            trackID = this.trackId,
-            trackName = this.trackName,
-            artistName = this.artistName,
-            trackTime = this.trackTime,
-            artworkUrl = this.artworkUrl,
-            collectionName = this.collectionName,
-            releaseDate = this.releaseDate,
-            primaryGenreName = this.primaryGenreName,
-            country = this.country,
-            previewUrl = this.trackUrl,
-            isFavorite = true
-        )
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

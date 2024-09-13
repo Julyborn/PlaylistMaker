@@ -29,10 +29,8 @@ class FavoriteRepositoryImpl(
         return trackDao.getAllTracks()
     }
 
-    override suspend fun getAllTracksIDs(): List<Int> {
+    override fun getAllTracksIDs(): Flow<List<Int>> {
         Log.d("БД", "Выдаю id треков")
-        return withContext(Dispatchers.IO) {
-            trackDao.getAllTracksIDs()
-        }
+        return trackDao.getAllTracksIDs()
     }
 }

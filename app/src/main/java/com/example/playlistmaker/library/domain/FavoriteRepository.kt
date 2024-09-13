@@ -7,5 +7,5 @@ interface  FavoriteRepository {
     suspend fun addTrack(track:TrackEntity)
     suspend fun removeTrack(track: TrackEntity)
     fun getAllTracks(): Flow<List<TrackEntity>>
-    suspend fun getAllTracksIDs(): List<Int>
+    fun getAllTracksIDs(): Flow<List<Int>>
 }

@@ -19,5 +19,5 @@ interface TrackDao {
     fun getAllTracks(): Flow<List<TrackEntity>>
 
     @Query("Select trackId FROM favorite")
-    fun getAllTracksIDs(): List<Int>
+    fun getAllTracksIDs(): Flow<List<Int>>
 }

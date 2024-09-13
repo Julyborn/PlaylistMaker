@@ -1,11 +1,9 @@
 package com.example.playlistmaker.player.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
@@ -13,7 +11,6 @@ import com.example.playlistmaker.databinding.ActivityPlayerBinding
 import com.example.playlistmaker.player.presentation.PlayerViewModel
 import com.example.playlistmaker.search.domain.models.Track
 import com.google.gson.Gson
-import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -33,14 +30,11 @@ class PlayerActivity : AppCompatActivity() {
         currentTrack = Gson().fromJson(intent.extras?.getString("track"), Track::class.java)
         updateUIWithTrackInfo(currentTrack)
         viewModel.preparePlayer(currentTrack.previewUrl)
-        lifecycleScope.launch {
-            val isFavorite = viewModel.isTrackFavorite(currentTrack.trackID)
-            Log.d("БД", "Трек в плеере: id ${currentTrack.trackID}")
-            Log.d("БД", "Трек ${currentTrack.trackName} избранный: ${isFavorite}")
-            binding.favoriteBut.setBackgroundResource(
+        viewModel.isTrackFavoriteLiveData(currentTrack.trackID).observe(this, Observer { isFavorite ->
+              binding.favoriteBut.setBackgroundResource(
                 if (isFavorite) R.drawable.ic_favorite_active else R.drawable.ic_favorite
             )
-        }
+        })
 
 
         binding.playBut.setOnClickListener {
@@ -51,10 +45,7 @@ class PlayerActivity : AppCompatActivity() {
             }
         }
 
-        binding.favoriteBut.setOnClickListener {
-            viewModel.FavButClicked(currentTrack)
-            binding.favoriteBut.setBackgroundResource(if (currentTrack.isFavorite) R.drawable.ic_favorite_active else R.drawable.ic_favorite)
-        }
+        binding.favoriteBut.setOnClickListener { viewModel.favButClicked(currentTrack) }
 
         binding.back.setOnClickListener { finish() }
 

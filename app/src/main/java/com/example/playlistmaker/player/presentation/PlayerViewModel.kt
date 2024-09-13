@@ -4,22 +4,21 @@ package com.example.playlistmaker.player.presentation
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
-import com.example.playlistmaker.library.data.db.TrackEntity
-import com.example.playlistmaker.library.domain.FavoriteRepository
+import com.example.playlistmaker.library.domain.FavoriteInteractor
 import com.example.playlistmaker.player.domain.PlayerInteractor
 import com.example.playlistmaker.search.domain.models.Track
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 class PlayerViewModel(
     private val playerInteractor: PlayerInteractor,
-    private val favoriteRepository: FavoriteRepository
+    private val favoriteInteractor: FavoriteInteractor
 
 ) : ViewModel() {
 
@@ -27,7 +26,7 @@ class PlayerViewModel(
     private val dateFormat by lazy { SimpleDateFormat("mm:ss", Locale.getDefault()) }
     private var timerJob: Job? = null
     private val _trackLiveData = MutableLiveData<Track>()
-    val trackLiveData: LiveData<Track> get() = _trackLiveData
+    private val favoriteTracksLiveData: LiveData<List<Int>> = favoriteInteractor.getAllTrackIDs().asLiveData()
 
     val playTime: LiveData<String> get() = _playTime
 
@@ -44,7 +43,6 @@ class PlayerViewModel(
     }
 
 
-
     init {
         playerInteractor.setOnPreparedListener {
             _isPlaying.value = false
@@ -54,6 +52,7 @@ class PlayerViewModel(
             _playTime.value = dateFormat.format(0)
         }
     }
+
     fun preparePlayer(url: String) {
         playerInteractor.preparePlayer(url)
     }
@@ -78,35 +77,21 @@ class PlayerViewModel(
         _playTime.value = dateFormat.format(playerInteractor.getCurrentPosition())
     }
 
-    fun FavButClicked(track: Track) {
+    fun favButClicked(track: Track) {
         viewModelScope.launch {
-            track.isFavorite = !track.isFavorite
-            if (track.isFavorite) {
-                favoriteRepository.addTrack(track.toEntity())
+            val isFavorite = favoriteTracksLiveData.value?.contains(track.trackID) ?: false
+            if (isFavorite) {
+                favoriteInteractor.removeTrack(track)
             } else {
-                favoriteRepository.removeTrack(track.toEntity())
+                favoriteInteractor.addTrack(track)
             }
             _trackLiveData.value = track
         }
     }
-    private fun Track.toEntity(): TrackEntity {
-        return TrackEntity(
-            trackId = this.trackID,
-            trackName = this.trackName,
-            artistName = this.artistName,
-            trackTime = this.trackTime,
-            artworkUrl = this.artworkUrl,
-            collectionName = this.collectionName,
-            releaseDate = this.releaseDate,
-            primaryGenreName = this.primaryGenreName,
-            country = this.country,
-            trackUrl = this.previewUrl
-        )
-    }
 
-    suspend fun isTrackFavorite(trackId: Int): Boolean {
-        return withContext(Dispatchers.IO) {
-            val favoriteTrackIds = favoriteRepository.getAllTracksIDs()
+
+    fun isTrackFavoriteLiveData(trackId: Int): LiveData<Boolean> {
+        return favoriteTracksLiveData.map { favoriteTrackIds ->
             favoriteTrackIds.contains(trackId)
         }
     }
