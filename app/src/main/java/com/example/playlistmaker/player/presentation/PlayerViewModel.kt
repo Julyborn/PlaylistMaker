@@ -4,8 +4,12 @@ package com.example.playlistmaker.player.presentation
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
+import com.example.playlistmaker.library.domain.FavoriteInteractor
 import com.example.playlistmaker.player.domain.PlayerInteractor
+import com.example.playlistmaker.search.domain.models.Track
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -13,12 +17,16 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class PlayerViewModel(
-    private val playerInteractor: PlayerInteractor
+    private val playerInteractor: PlayerInteractor,
+    private val favoriteInteractor: FavoriteInteractor
+
 ) : ViewModel() {
 
     private val _playTime = MutableLiveData<String>()
     private val dateFormat by lazy { SimpleDateFormat("mm:ss", Locale.getDefault()) }
     private var timerJob: Job? = null
+    private val _trackLiveData = MutableLiveData<Track>()
+    private val favoriteTracksLiveData: LiveData<List<Int>> = favoriteInteractor.getAllTrackIDs().asLiveData()
 
     val playTime: LiveData<String> get() = _playTime
 
@@ -34,6 +42,7 @@ class PlayerViewModel(
         }
     }
 
+
     init {
         playerInteractor.setOnPreparedListener {
             _isPlaying.value = false
@@ -43,6 +52,7 @@ class PlayerViewModel(
             _playTime.value = dateFormat.format(0)
         }
     }
+
     fun preparePlayer(url: String) {
         playerInteractor.preparePlayer(url)
     }
@@ -65,6 +75,25 @@ class PlayerViewModel(
 
     private fun updatePlayTime() {
         _playTime.value = dateFormat.format(playerInteractor.getCurrentPosition())
+    }
+
+    fun favButClicked(track: Track) {
+        viewModelScope.launch {
+            val isFavorite = favoriteTracksLiveData.value?.contains(track.trackID) ?: false
+            if (isFavorite) {
+                favoriteInteractor.removeTrack(track)
+            } else {
+                favoriteInteractor.addTrack(track)
+            }
+            _trackLiveData.value = track
+        }
+    }
+
+
+    fun isTrackFavoriteLiveData(trackId: Int): LiveData<Boolean> {
+        return favoriteTracksLiveData.map { favoriteTrackIds ->
+            favoriteTrackIds.contains(trackId)
+        }
     }
 }
 

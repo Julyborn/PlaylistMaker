@@ -1,16 +1,13 @@
 package com.example.playlistmaker.player.ui
 
-
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
+import com.example.playlistmaker.databinding.ActivityPlayerBinding
 import com.example.playlistmaker.player.presentation.PlayerViewModel
 import com.example.playlistmaker.search.domain.models.Track
 import com.google.gson.Gson
@@ -19,36 +16,28 @@ import org.koin.core.parameter.parametersOf
 
 class PlayerActivity : AppCompatActivity() {
 
-    private lateinit var titleName: TextView
-    private lateinit var artistName: TextView
-    private lateinit var playerImg: ImageView
-    private lateinit var trackLength: TextView
-    private lateinit var trackAlbum: TextView
-    private lateinit var trackYear: TextView
-    private lateinit var trackStyle: TextView
-    private lateinit var trackCountry: TextView
-    private lateinit var staticTrackAlbum: TextView
-    private lateinit var backButton: ImageView
-    private lateinit var playButton: ImageButton
-    private lateinit var playerTimer: TextView
-
+    private lateinit var binding: ActivityPlayerBinding
     private val radius by lazy { 8 * resources.displayMetrics.density }
-
+    private lateinit var currentTrack: Track
     private val viewModel: PlayerViewModel by viewModel {
         parametersOf(Gson().fromJson(intent.extras?.getString("track"), Track::class.java))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_player)
+        binding = ActivityPlayerBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        currentTrack = Gson().fromJson(intent.extras?.getString("track"), Track::class.java)
+        updateUIWithTrackInfo(currentTrack)
+        viewModel.preparePlayer(currentTrack.previewUrl)
+        viewModel.isTrackFavoriteLiveData(currentTrack.trackID).observe(this, Observer { isFavorite ->
+              binding.favoriteBut.setBackgroundResource(
+                if (isFavorite) R.drawable.ic_favorite_active else R.drawable.ic_favorite
+            )
+        })
 
-        initializeViews()
 
-        val track = Gson().fromJson(intent.extras?.getString("track"), Track::class.java)
-        updateUIWithTrackInfo(track)
-        viewModel.preparePlayer(track.previewUrl)
-
-        playButton.setOnClickListener {
+        binding.playBut.setOnClickListener {
             if (viewModel.isPlaying.value == true) {
                 viewModel.pausePlayer()
             } else {
@@ -56,11 +45,13 @@ class PlayerActivity : AppCompatActivity() {
             }
         }
 
-        backButton.setOnClickListener { finish() }
+        binding.favoriteBut.setOnClickListener { viewModel.favButClicked(currentTrack) }
 
-        viewModel.playTime.observe(this, Observer { playerTimer.text = it })
+        binding.back.setOnClickListener { finish() }
+
+        viewModel.playTime.observe(this, Observer { binding.playerTimer.text = it })
         viewModel.isPlaying.observe(this, Observer { isPlaying ->
-            playButton.setBackgroundResource(if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
+            binding.playBut.setBackgroundResource(if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
         })
     }
 
@@ -74,30 +65,15 @@ class PlayerActivity : AppCompatActivity() {
         viewModel.releasePlayer()
     }
 
-    private fun initializeViews() {
-        titleName = findViewById(R.id.title_name)
-        artistName = findViewById(R.id.artist_name)
-        playerImg = findViewById(R.id.img)
-        trackLength = findViewById(R.id.length_detail)
-        trackAlbum = findViewById(R.id.album_detail)
-        trackYear = findViewById(R.id.year_detail)
-        trackStyle = findViewById(R.id.style_detail)
-        trackCountry = findViewById(R.id.country_detail)
-        staticTrackAlbum = findViewById(R.id.album)
-        playerTimer = findViewById(R.id.player_timer)
-        playButton = findViewById(R.id.play_but)
-        backButton = findViewById(R.id.back)
-    }
-
     private fun updateUIWithTrackInfo(track: Track) {
-        titleName.text = track.trackName
-        artistName.text = track.artistName
+        binding.titleName.text = track.trackName
+        binding.artistName.text = track.artistName
         loadImage(track.artworkUrl)
-        trackLength.text = track.trackTime
+        binding.lengthDetail.text = track.trackTime
         updateAlbumVisibility(track.collectionName)
-        trackYear.text = extractYear(track.releaseDate)
-        trackStyle.text = track.primaryGenreName
-        trackCountry.text = track.country
+        binding.yearDetail.text = extractYear(track.releaseDate)
+        binding.styleDetail.text = track.primaryGenreName
+        binding.countryDetail.text = track.country
     }
 
     private fun loadImage(imageUrl: String) {
@@ -106,17 +82,17 @@ class PlayerActivity : AppCompatActivity() {
             .centerCrop()
             .transform(RoundedCorners(radius.toInt()))
             .placeholder(R.drawable.ic_search_placeholder)
-            .into(playerImg)
+            .into(binding.img)
     }
 
     private fun updateAlbumVisibility(albumName: String) {
         if (albumName.isEmpty()) {
-            trackAlbum.visibility = View.GONE
-            staticTrackAlbum.visibility = View.GONE
+            binding.albumDetail.visibility = View.GONE
+            binding.album.visibility = View.GONE
         } else {
-            trackAlbum.visibility = View.VISIBLE
-            staticTrackAlbum.visibility = View.VISIBLE
-            trackAlbum.text = albumName
+            binding.albumDetail.visibility = View.VISIBLE
+            binding.album.visibility = View.VISIBLE
+            binding.albumDetail.text = albumName
         }
     }
 
