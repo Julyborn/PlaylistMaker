@@ -1,6 +1,6 @@
-package com.example.playlistmaker.library.domain
+package com.example.playlistmaker.library.domain.favorite
 
-import com.example.playlistmaker.library.data.db.TrackEntity
+import com.example.playlistmaker.library.data.db.entity.TrackEntity
 import com.example.playlistmaker.search.domain.models.Track
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

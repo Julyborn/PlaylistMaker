@@ -32,6 +32,7 @@
         android:id="@+id/bottomNavigationView"
         app:itemActiveIndicatorStyle="@android:color/transparent"
         android:layout_width="0dp"
+        app:itemRippleColor="@null"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

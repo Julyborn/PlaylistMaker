@@ -1,7 +1,7 @@
 import android.util.Log
-import com.example.playlistmaker.library.data.db.TrackDao
-import com.example.playlistmaker.library.data.db.TrackEntity
-import com.example.playlistmaker.library.domain.FavoriteRepository
+import com.example.playlistmaker.library.data.db.dao.TrackDao
+import com.example.playlistmaker.library.data.db.entity.TrackEntity
+import com.example.playlistmaker.library.domain.favorite.FavoriteRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
