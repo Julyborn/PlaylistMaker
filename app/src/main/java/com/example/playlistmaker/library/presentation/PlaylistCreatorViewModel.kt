@@ -1,6 +1,5 @@
 package com.example.playlistmaker.library.presentation
 
-import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -26,8 +25,8 @@ class PlaylistCreatorViewModel(private val interactor: PlaylistInteractor) : Vie
         }
     }
 
-    fun saveImage(context: Context, name: String, inputStream: InputStream?, time: Date) {
-        val uri = interactor.saveImage(context, name, inputStream, time)
+    fun saveImage(name: String, inputStream: InputStream?, time: Date) {
+        val uri = interactor.saveImage(name, inputStream, time)
         fileLiveData.postValue(uri)
     }
 }

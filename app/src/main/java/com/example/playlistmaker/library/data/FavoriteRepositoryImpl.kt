@@ -1,35 +1,35 @@
+
 import android.util.Log
 import com.example.playlistmaker.library.data.db.dao.TrackDao
-import com.example.playlistmaker.library.data.db.entity.TrackEntity
+import com.example.playlistmaker.library.data.toDomainModel
+import com.example.playlistmaker.library.data.toEntity
 import com.example.playlistmaker.library.domain.favorite.FavoriteRepository
-import kotlinx.coroutines.Dispatchers
+import com.example.playlistmaker.search.domain.models.Track
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.map
 
 class FavoriteRepositoryImpl(
     private val trackDao: TrackDao
 ) : FavoriteRepository {
 
-    override suspend fun addTrack(track: TrackEntity) {
+    override suspend fun addTrack(track: Track) {
         Log.d("БД", "Добавляю трек ${track.trackName}")
-        withContext(Dispatchers.IO) {
-            trackDao.insertTrack(track)
-        }
+        trackDao.insertTrack(track.toEntity())
     }
 
-    override suspend fun removeTrack(track: TrackEntity) {
+    override suspend fun removeTrack(track: Track) {
         Log.d("БД", "Удаляю трек ${track.trackName}")
-        withContext(Dispatchers.IO) {
-            trackDao.deleteTrack(track.trackId)
+        trackDao.deleteTrack(track.trackID)
+    }
+
+    override fun getAllTracks(): Flow<List<Track>> {
+        Log.d("БД", "Выдаю Треки")
+        return trackDao.getAllTracks().map { entities ->
+            entities.map { it.toDomainModel() }
         }
     }
 
-    override fun getAllTracks(): Flow<List<TrackEntity>> {
-        Log.d("БД", "Выдаю Треки")
-        return trackDao.getAllTracks()
-    }
-
-    override fun getAllTracksIDs(): Flow<List<Int>> {
+    override fun getAllTrackIDs(): Flow<List<Int>> {
         Log.d("БД", "Выдаю id треков")
         return trackDao.getAllTracksIDs()
     }

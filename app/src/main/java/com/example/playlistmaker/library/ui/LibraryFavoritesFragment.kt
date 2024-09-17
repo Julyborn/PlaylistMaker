@@ -49,8 +49,6 @@ class LibraryFavoritesFragment : Fragment(), TrackInteractionListener {
         viewModel.tracksLiveData.observe(viewLifecycleOwner, Observer { tracks ->
             render(tracks)
             Log.d("Бд", "Количество треков: ${tracks.size}")
-
-
         })
     }
 

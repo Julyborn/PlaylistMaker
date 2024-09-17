@@ -106,6 +106,7 @@
         android:textAllCaps="false"
         android:textColor="@color/white"
         android:letterSpacing="0"
+        android:outlineProvider="none"
         android:enabled="false"
         android:id="@+id/create_playlist_but" />
 

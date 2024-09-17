@@ -157,7 +157,6 @@ class PlaylistCreatorFragment : Fragment() {
 
         if (imageUri.isNotEmpty()) {
             viewModel.saveImage(
-                requireContext(),
                 newName,
                 requireContext().contentResolver.openInputStream(imageUri.toUri()),
                 currentTime

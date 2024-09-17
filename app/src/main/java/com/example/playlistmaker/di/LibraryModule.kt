@@ -11,6 +11,7 @@ import com.example.playlistmaker.library.domain.playlist.PlaylistRepository
 import com.example.playlistmaker.library.presentation.LibraryFavoritesViewModel
 import com.example.playlistmaker.library.presentation.LibraryPlaylistViewModel
 import com.example.playlistmaker.library.presentation.PlaylistCreatorViewModel
+import org.koin.android.ext.koin.androidApplication
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -39,7 +40,8 @@ val libraryModule = module {
     factory<PlaylistRepository> {
         PlaylistRepositoryImpl(
             playlistDao = get(),
-            playlistTrackDao = get()
+            playlistTrackDao = get(),
+            application = androidApplication()
         )
     }
 
