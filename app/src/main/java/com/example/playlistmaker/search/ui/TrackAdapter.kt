@@ -26,7 +26,7 @@ class TrackAdapter(val tracks: MutableList<Track>, private val interactionListen
             trackTimeTextView.text = track.trackTime
             Glide.with(itemView.context)
                 .load(track.artworkUrl)
-                .placeholder(R.drawable.ic_search_placeholder)
+                .placeholder(R.drawable.ic_placeholder)
                 .centerCrop()
                 .transform(RoundedCorners(2))
                 .into(artworkImageView)

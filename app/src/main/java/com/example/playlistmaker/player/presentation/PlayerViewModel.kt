@@ -7,9 +7,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
-import com.example.playlistmaker.library.domain.FavoriteInteractor
+import com.example.playlistmaker.library.domain.favorite.FavoriteInteractor
+import com.example.playlistmaker.library.domain.playlist.Playlist
+import com.example.playlistmaker.library.domain.playlist.PlaylistInteractor
 import com.example.playlistmaker.player.domain.PlayerInteractor
 import com.example.playlistmaker.search.domain.models.Track
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -18,7 +21,8 @@ import java.util.Locale
 
 class PlayerViewModel(
     private val playerInteractor: PlayerInteractor,
-    private val favoriteInteractor: FavoriteInteractor
+    private val favoriteInteractor: FavoriteInteractor,
+    private val playlistInteractor: PlaylistInteractor
 
 ) : ViewModel() {
 
@@ -27,6 +31,9 @@ class PlayerViewModel(
     private var timerJob: Job? = null
     private val _trackLiveData = MutableLiveData<Track>()
     private val favoriteTracksLiveData: LiveData<List<Int>> = favoriteInteractor.getAllTrackIDs().asLiveData()
+    private var playlistList: List<Playlist> = listOf()
+    private val _playlistsLiveData = MutableLiveData<List<Playlist>>()
+    val playlistsLiveData: LiveData<List<Playlist>> get() = _playlistsLiveData
 
     val playTime: LiveData<String> get() = _playTime
 
@@ -93,6 +100,23 @@ class PlayerViewModel(
     fun isTrackFavoriteLiveData(trackId: Int): LiveData<Boolean> {
         return favoriteTracksLiveData.map { favoriteTrackIds ->
             favoriteTrackIds.contains(trackId)
+        }
+    }
+
+    fun getPlaylists() {
+        viewModelScope.launch(Dispatchers.IO) {
+            playlistInteractor.getPlaylists().collect { playlists ->
+                _playlistsLiveData.postValue(playlists)
+            }
+        }
+    }
+
+    fun updatePlaylists(playlist: Playlist) {
+        viewModelScope.launch(Dispatchers.IO) { playlistInteractor.updatePlaylist(playlist) }
+    }
+    fun insertPlaylistTrack(track: Track) {
+        viewModelScope.launch(Dispatchers.IO) {
+            playlistInteractor.insertPlaylistTrack(track)
         }
     }
 }
