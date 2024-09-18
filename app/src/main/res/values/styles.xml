@@ -162,4 +162,19 @@
         <item name="android:letterSpacing">0</item>
     </style>
 
+    <style name="BottomNavigationTextAppearance" parent="TextAppearance.AppCompat.Caption">
+        <item name="android:textSize">12sp</item>
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">8dp</item>
+    </style>
+    <style name="CustomBottomNavigationStyle" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="itemTextAppearanceActive">@style/CustomBottomNavText</item>
+        <item name="itemTextAppearanceInactive">@style/CustomBottomNavText</item>
+        <item name="itemIconSize">20dp</item> <!-- Уменьшение размера иконки -->
+    </style>
+    <style name="CustomBottomNavText">
+        <item name="android:textSize">12sp</item>
+\        <item name="android:layout_marginBottom">8dp</item> <!-- Модификация для отступа снизу -->
+    </style>
+
 </resources>
