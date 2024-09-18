@@ -30,7 +30,7 @@ class PlaylistActivity : AppCompatActivity() {
 
     private var isClickAllowed = true
     private lateinit var tracks: List<Track>
-    private lateinit var trackDelete: String
+    private var trackDeleteId: Int = -1
 
     private fun clickDebounce(): Boolean {
         val current = isClickAllowed
@@ -64,7 +64,7 @@ class PlaylistActivity : AppCompatActivity() {
             .setMessage(getString(R.string.track_delete_message))
             .setNeutralButton(getString(R.string.cancel)) { _, _ -> }
             .setPositiveButton(getString(R.string.delete)) { _, _ ->
-                viewModel.updatePlaylist(trackDelete)
+                viewModel.deleteTrack(trackDeleteId)
                 viewModel.bindAgain()
             }
 
@@ -86,7 +86,7 @@ class PlaylistActivity : AppCompatActivity() {
                 }
             },
             onTrackLongClick = { track ->
-                trackDelete = track.trackID.toString()
+                trackDeleteId = track.trackID
                 trackDeleteDialog.show()
             }
         )

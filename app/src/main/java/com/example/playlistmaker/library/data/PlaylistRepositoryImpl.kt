@@ -75,6 +75,7 @@ class PlaylistRepositoryImpl(
 
         if (trackUsageCount == 0) {
             playlistTrackDao.deleteTrack(trackId)
+            Log.d("БД", "Трек с id $trackId полностью удален")
         }
     }
     override suspend fun deletePlaylist(playlist: Playlist) {
