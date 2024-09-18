@@ -59,8 +59,14 @@ class PlaylistRepositoryImpl(
                 }
             }
     }
+
     override suspend fun deleteTrack(playlist: Playlist, trackId: Int) {
-        val updatedPlaylistContent = playlist.content.split(",").filterNot { it.toInt() == trackId }.joinToString(",")
+        val updatedPlaylistContent = playlist.content
+            .split(",")
+            .filter { it.isNotBlank() }
+            .filterNot { it.toInt() == trackId }
+            .joinToString(",")
+
         val updatedPlaylist = playlist.copy(content = updatedPlaylistContent, count = playlist.count - 1)
         playlistDao.updatePlaylist(updatedPlaylist.toEntity())
 
