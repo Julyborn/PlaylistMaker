@@ -63,6 +63,7 @@ class PlaylistRepositoryImpl(
     override suspend fun deleteTrack(playlist: Playlist, trackId: Int) {
         val updatedPlaylistContent = playlist.content
             .split(",")
+            .map { it.trim() }
             .filter { it.isNotBlank() }
             .filterNot { it.toInt() == trackId }
             .joinToString(",")
@@ -76,7 +77,6 @@ class PlaylistRepositoryImpl(
             playlistTrackDao.deleteTrack(trackId)
         }
     }
-
     override suspend fun deletePlaylist(playlist: Playlist) {
         playlistDao.deletePlaylist(playlist.id)
         val playlistTracks = getPlaylistTracks().first()
