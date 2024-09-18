@@ -11,21 +11,19 @@ import com.example.playlistmaker.databinding.PlaylistItemBinding
 import com.example.playlistmaker.library.domain.playlist.Playlist
 
 class PlaylistAdapter(
+    private val onPlaylistClick: (Playlist) -> Unit
 ) : RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder>() {
 
     private var playlists: List<Playlist> = listOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PlaylistViewHolder {
         val binding = PlaylistItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return PlaylistViewHolder(binding)
+        return PlaylistViewHolder(binding, onPlaylistClick)
     }
 
     override fun onBindViewHolder(holder: PlaylistViewHolder, position: Int) {
         val playlist = playlists[position]
         holder.bind(playlist)
-        holder.itemView.setOnClickListener {
-         //   interactionListener.onPlaylistSelected(playlist)
-        }
     }
 
     override fun getItemCount(): Int {
@@ -37,8 +35,10 @@ class PlaylistAdapter(
         notifyDataSetChanged()
     }
 
-    class PlaylistViewHolder(private val binding: PlaylistItemBinding) :
-        RecyclerView.ViewHolder(binding.root) {
+    class PlaylistViewHolder(
+        private val binding: PlaylistItemBinding,
+        private val onPlaylistClick: (Playlist) -> Unit
+    ) : RecyclerView.ViewHolder(binding.root) {
 
         private val radius: Float = 8 * itemView.resources.displayMetrics.density
 
@@ -49,6 +49,10 @@ class PlaylistAdapter(
                 .transform(CenterCrop(), RoundedCorners(radius.toInt()))
                 .placeholder(R.drawable.ic_placeholder)
                 .into(playlistImg)
+
+            itemView.setOnClickListener {
+                onPlaylistClick(model)
+            }
         }
 
         private fun bindTracks(count: Int): String {
@@ -61,3 +65,4 @@ class PlaylistAdapter(
         }
     }
 }
+

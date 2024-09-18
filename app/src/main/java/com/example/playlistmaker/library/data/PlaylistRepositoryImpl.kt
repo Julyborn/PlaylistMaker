@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Environment
+import android.util.Log
 import androidx.core.net.toUri
 import com.example.playlistmaker.library.data.db.dao.PlaylistDao
 import com.example.playlistmaker.library.data.db.dao.PlaylistTrackDao
@@ -42,6 +43,27 @@ class PlaylistRepositoryImpl(
         playlistTrackDao.insertTrack(track.PlaylistTrackEntity())
     }
 
+    override fun getPlaylist(id: Long): Flow<Playlist> {
+        return playlistDao.getPlaylist(id)
+            .map { playlistEntity ->
+                playlistEntity?.toDomainModel() ?: Playlist(id = 0, name = "", image = "", count = 0, info = "", content = "")
+            }
+    }
+
+    override fun getPlaylistTracks(): Flow<List<Track>> {
+        return playlistTrackDao.getPlaylistTracks()
+            .map { playlistTrackEntities ->
+                playlistTrackEntities.map { playlistTrackEntity ->
+                    playlistTrackEntity.toDomainModel()
+                }
+            }
+    }
+
+
+    override suspend fun deletePlaylist(playlist: Playlist) {
+        playlistDao.deletePlaylist(playlist.id)
+    }
+
     override fun saveImage(
         name: String,
         inputStream: InputStream?,
@@ -58,4 +80,6 @@ class PlaylistRepositoryImpl(
             .compress(Bitmap.CompressFormat.JPEG, 30, outputStream)
         return file.toUri()
     }
+
+
 }

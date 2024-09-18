@@ -85,14 +85,14 @@ class PlayerViewModel(
     }
 
     fun favButClicked(track: Track) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val isFavorite = favoriteTracksLiveData.value?.contains(track.trackID) ?: false
             if (isFavorite) {
                 favoriteInteractor.removeTrack(track)
             } else {
                 favoriteInteractor.addTrack(track)
             }
-            _trackLiveData.value = track
+            _trackLiveData.postValue(track)
         }
     }
 

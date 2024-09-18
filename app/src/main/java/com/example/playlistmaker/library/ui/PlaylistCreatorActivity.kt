@@ -9,10 +9,13 @@ class PlaylistCreatorActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_playlist_creator)
-        if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.container, PlaylistCreatorFragment())
-                .commitNow()
-        }
+        val playlistJson = intent.getStringExtra("playlist")
+        val playlistCreatorFragment = PlaylistCreatorFragment()
+        val bundle = Bundle()
+        bundle.putString("playlist", playlistJson)
+        playlistCreatorFragment.arguments = bundle
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.container, playlistCreatorFragment)
+            .commit()
     }
 }

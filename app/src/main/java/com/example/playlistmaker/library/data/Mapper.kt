@@ -37,6 +37,9 @@ fun Track.toEntity(): TrackEntity {
 }
 
 fun PlaylistEntity.toDomainModel(): Playlist {
+    if (this == null) {
+        throw IllegalArgumentException("PlaylistEntity is null")
+    }
     return Playlist(
         id = this.id,
         name = this.name,
@@ -55,6 +58,21 @@ fun Playlist.toEntity(): PlaylistEntity {
         count = this.count,
         info = this.info,
         content = this.content
+    )
+}
+
+fun PlaylistTrackEntity.toDomainModel(): Track {
+    return Track(
+        trackID = this.trackId,
+        trackName = this.trackName,
+        artistName = this.artistName,
+        trackTime = this.trackTime,
+        artworkUrl = this.artworkUrl,
+        collectionName = this.collectionName,
+        releaseDate = this.releaseDate,
+        primaryGenreName = this.primaryGenreName,
+        country = this.country,
+        previewUrl = this.trackUrl
     )
 }
 

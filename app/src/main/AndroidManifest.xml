@@ -29,6 +29,9 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".library.ui.PlaylistActivity"
+            android:exported="false" />
+        <activity
             android:name=".player.ui.PlayerActivity"
             android:exported="false"
             android:screenOrientation="portrait" />

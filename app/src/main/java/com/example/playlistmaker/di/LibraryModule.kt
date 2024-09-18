@@ -11,6 +11,7 @@ import com.example.playlistmaker.library.domain.playlist.PlaylistRepository
 import com.example.playlistmaker.library.presentation.LibraryFavoritesViewModel
 import com.example.playlistmaker.library.presentation.LibraryPlaylistViewModel
 import com.example.playlistmaker.library.presentation.PlaylistCreatorViewModel
+import com.example.playlistmaker.library.presentation.PlaylistViewModel
 import org.koin.android.ext.koin.androidApplication
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -28,7 +29,9 @@ val libraryModule = module {
     factory<FavoriteRepository> {
         FavoriteRepositoryImpl(trackDao = get())
     }
-
+    viewModel {
+        PlaylistViewModel(get())
+    }
     viewModel {
         LibraryPlaylistViewModel(get())
     }
@@ -48,4 +51,5 @@ val libraryModule = module {
     viewModel {
         PlaylistCreatorViewModel(get())
     }
+
 }

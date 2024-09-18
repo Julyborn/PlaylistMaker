@@ -31,7 +31,11 @@ class LibraryPlaylistsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val adapter = PlaylistAdapter()
+        val adapter = PlaylistAdapter { playlist ->
+            val intent = Intent(requireContext(), PlaylistActivity::class.java)
+            intent.putExtra("PLAYLIST_ID", playlist.id)
+            startActivity(intent)
+        }
         binding.playlistList.layoutManager = GridLayoutManager(requireActivity(), 2)
         binding.playlistList.adapter = adapter
 
