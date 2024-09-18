@@ -17,7 +17,10 @@ interface PlaylistTrackDao {
     @Query("DELETE FROM playlist_tracks WHERE trackId = :trackId")
     fun deleteTrack (trackId:Int)
 
-    @Query("Select * FROM playlist_tracks ORDER BY number DESC")
+    @Query("SELECT COUNT(*) FROM playlists WHERE content LIKE '%' || :trackId || '%'")
+    suspend fun getTrackInPlaylistsCount(trackId: Int): Int
+
+    @Query("Select * FROM playlist_tracks ORDER BY trackId DESC")
     fun getAllTracks(): Flow<List<PlaylistTrackEntity>>
 
     @Query("Select trackId FROM playlist_tracks")
@@ -25,4 +28,6 @@ interface PlaylistTrackDao {
 
     @Query("Select * FROM playlist_tracks")
     fun getPlaylistTracks(): Flow<List<TrackEntity>>
+
+
 }

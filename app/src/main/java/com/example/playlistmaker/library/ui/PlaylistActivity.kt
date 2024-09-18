@@ -51,15 +51,15 @@ class PlaylistActivity : AppCompatActivity() {
         viewModel.loadPlaylist(intent)
 
         val tracksBottomSheet = BottomSheetBehavior.from(binding.playlistBottomSheet)
-        tracksBottomSheet.state = BottomSheetBehavior.STATE_EXPANDED
+        tracksBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
 
         val optionsBottomSheet = BottomSheetBehavior.from(binding.playlistOptionsBottomSheet)
         optionsBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
 
-        val emptyTracksMes = MaterialAlertDialogBuilder(this, R.style.dialog)
+        val emptyTracksMes = MaterialAlertDialogBuilder(this, R.style.toast)
             .setMessage(getString(R.string.empty_tracks_message))
 
-        val trackDeleteDialog = MaterialAlertDialogBuilder(this, R.style.dialog)
+        val trackDeleteDialog = MaterialAlertDialogBuilder(this, R.style.toast)
             .setTitle(getString(R.string.delete_track))
             .setMessage(getString(R.string.track_delete_message))
             .setNeutralButton(getString(R.string.cancel)) { _, _ -> }
@@ -68,7 +68,7 @@ class PlaylistActivity : AppCompatActivity() {
                 viewModel.bindAgain()
             }
 
-        val deleteDialog = MaterialAlertDialogBuilder(this, R.style.dialog)
+        val deleteDialog = MaterialAlertDialogBuilder(this, R.style.toast)
             .setTitle(getString(R.string.delete_title))
             .setMessage(getString(R.string.delete_text))
             .setNegativeButton(getString(R.string.no)) { _, _ -> }
@@ -149,7 +149,7 @@ class PlaylistActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.bindAgain()
+        viewModel.loadPlaylist(intent)
     }
 
     private fun sharePlaylist() {

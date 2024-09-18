@@ -126,7 +126,7 @@ class PlaylistCreatorFragment : Fragment() {
     }
 
     private fun showQuitDialog() {
-        MaterialAlertDialogBuilder(requireContext(), R.style.dialog)
+        MaterialAlertDialogBuilder(requireContext(), R.style.toast)
             .setTitle(getString(R.string.playlist_creator_toast_title))
             .setMessage(getString(R.string.playlist_creator_toast_message))
             .setNeutralButton(getString(R.string.playlist_creator_resume), null)

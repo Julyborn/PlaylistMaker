@@ -42,7 +42,9 @@ class PlaylistInteractorImpl(
     override fun getPlaylistTracks(): Flow<List<Track>> {
         return playlistRepository.getPlaylistTracks()
     }
-
+    override suspend fun deleteTrack(playlist: Playlist, trackId: Int) {
+        playlistRepository.deleteTrack(playlist, trackId)
+    }
     override suspend fun deletePlaylist(playlist: Playlist) {
         playlistRepository.deletePlaylist(playlist)
     }

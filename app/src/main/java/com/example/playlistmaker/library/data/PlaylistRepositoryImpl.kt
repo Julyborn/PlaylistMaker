@@ -13,6 +13,7 @@ import com.example.playlistmaker.library.domain.playlist.Playlist
 import com.example.playlistmaker.library.domain.playlist.PlaylistRepository
 import com.example.playlistmaker.search.domain.models.Track
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.File
 import java.io.FileOutputStream
@@ -40,7 +41,7 @@ class PlaylistRepositoryImpl(
     }
 
     override suspend fun savePlaylistTrack(track: Track) {
-        playlistTrackDao.insertTrack(track.PlaylistTrackEntity())
+        playlistTrackDao.insertTrack(track.toPlaylistTrackEntity())
     }
 
     override fun getPlaylist(id: Long): Flow<Playlist> {
@@ -58,10 +59,24 @@ class PlaylistRepositoryImpl(
                 }
             }
     }
+    override suspend fun deleteTrack(playlist: Playlist, trackId: Int) {
+        val updatedPlaylistContent = playlist.content.split(",").filterNot { it.toInt() == trackId }.joinToString(",")
+        val updatedPlaylist = playlist.copy(content = updatedPlaylistContent, count = playlist.count - 1)
+        playlistDao.updatePlaylist(updatedPlaylist.toEntity())
 
+        val trackUsageCount = playlistTrackDao.getTrackInPlaylistsCount(trackId)
+
+        if (trackUsageCount == 0) {
+            playlistTrackDao.deleteTrack(trackId)
+        }
+    }
 
     override suspend fun deletePlaylist(playlist: Playlist) {
         playlistDao.deletePlaylist(playlist.id)
+        val playlistTracks = getPlaylistTracks().first()
+        playlistTracks.forEach { track ->
+            deleteTrack(playlist, track.trackID)
+        }
     }
 
     override fun saveImage(

@@ -21,4 +21,11 @@
     <style name="divider">
         <item name="android:background">@color/gray_light</item>
     </style>
-</resources>
+    <style name="toast" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
+        <item name="android:textColorPrimary">@color/black_light</item>
+        <item name="android:textColor">@color/black_light</item>
+        <item name="colorPrimary">@color/blue</item>
+        <item name="android:background">@drawable/background_toast</item>
+    </style>
+
+    ></resources>

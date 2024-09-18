@@ -59,7 +59,11 @@ class PlaylistViewModel(
             interactor.deletePlaylist(thisPlaylist)
         }
     }
-
+    fun deleteTrack(trackid:Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            interactor.deleteTrack(thisPlaylist,trackid)
+        }
+    }
     fun updatePlaylist(id: String) {
         viewModelScope.launch {
             interactor.updatePlaylist(

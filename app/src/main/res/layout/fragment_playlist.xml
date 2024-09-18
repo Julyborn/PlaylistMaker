@@ -119,6 +119,9 @@
             android:background="@color/gray_light" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <!-- Я не понимаю как задать верную высоту. Хардкодить её не вариант какбудто,
+    но при этом я не могу задать её относительно других элементов, так как это bottomsheet.
+    В итоге все же решил тупа понизить высоту на 40dp. Так хотя бы на моем устройстве отображение соответствует макету-->
     <LinearLayout
         android:id="@+id/playlist_bottom_sheet"
         android:layout_width="match_parent"
@@ -126,10 +129,11 @@
         android:background="@drawable/sheet_background"
         android:orientation="vertical"
         app:behavior_hideable="false"
-        app:behavior_peekHeight="240dp"
+        app:behavior_peekHeight="200dp"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/playlist_share_but">
+
 
         <View
             android:layout_width="50dp"

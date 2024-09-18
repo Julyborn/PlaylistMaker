@@ -1,5 +1,6 @@
 package com.example.playlistmaker.search.ui
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -36,7 +37,6 @@ class SearchFragment : Fragment(), TrackInteractionListener {
 
     private val searchAdapter = TrackAdapter(mutableListOf(), this)
     private val historyAdapter = TrackAdapter(mutableListOf(), this)
-    private var isFirstRender = true
     private var clickJob: Job? = null
 
     override fun onCreateView(
@@ -97,7 +97,13 @@ class SearchFragment : Fragment(), TrackInteractionListener {
             showHistory(shouldShowHistory)
         }
     }
-
+    override fun onResume() {
+        super.onResume()
+        observeViewModel()
+        viewModel.tracksState.value?.let { tracksState ->
+            render(tracksState)
+        }
+    }
     private fun observeViewModel() {
         lifecycleScope.launch {
             viewModel.tracksState.collectLatest { tracksState ->
@@ -118,7 +124,6 @@ class SearchFragment : Fragment(), TrackInteractionListener {
     private fun performSearch() {
         val searchText = binding.searchEditText.text.toString().trim()
         if (searchText.isNotEmpty()) {
-            showNothing()
             viewModel.searchTracks(searchText)
         }
     }
@@ -149,9 +154,10 @@ class SearchFragment : Fragment(), TrackInteractionListener {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun render(tracksState: TracksState) {
-        if (isFirstRender) {
-            isFirstRender = false
+        showNothing()
+        if ( binding.searchEditText.text.isEmpty()) {
             return
         }
         when (tracksState) {

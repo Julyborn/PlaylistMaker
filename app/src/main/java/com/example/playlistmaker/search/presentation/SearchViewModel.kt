@@ -33,7 +33,7 @@ class SearchViewModel(
     private val SEARCH_DEBOUNCE_DELAY = 2000L
 
     fun searchTracks(query: String) {
-        if (query.isEmpty() || query == lastRequest) {
+        if (query.isEmpty()) {
             return
         }
         searchJob?.cancel()
