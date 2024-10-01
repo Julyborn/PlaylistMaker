@@ -58,9 +58,25 @@ fun Playlist.toEntity(): PlaylistEntity {
     )
 }
 
-fun Track.PlaylistTrackEntity(): PlaylistTrackEntity {
+fun PlaylistTrackEntity.toDomainModel(): Track {
+    return Track(
+        trackID = this.trackId,
+        trackName = this.trackName,
+        artistName = this.artistName,
+        trackTime = this.trackTime,
+        artworkUrl = this.artworkUrl,
+        collectionName = this.collectionName,
+        releaseDate = this.releaseDate,
+        primaryGenreName = this.primaryGenreName,
+        country = this.country,
+        previewUrl = this.trackUrl
+    )
+}
+
+fun Track.toPlaylistTrackEntity(): PlaylistTrackEntity {
     return PlaylistTrackEntity(
         trackId = this.trackID,
+        number = this.trackID,
         trackName = this.trackName,
         artistName = this.artistName,
         trackTime = this.trackTime,
@@ -72,3 +88,4 @@ fun Track.PlaylistTrackEntity(): PlaylistTrackEntity {
         trackUrl = this.previewUrl
     )
 }
+

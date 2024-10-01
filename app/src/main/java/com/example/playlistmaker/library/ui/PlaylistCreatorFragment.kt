@@ -26,6 +26,7 @@ import com.example.playlistmaker.databinding.FragmentPlaylistCreatorBinding
 import com.example.playlistmaker.library.domain.playlist.Playlist
 import com.example.playlistmaker.library.presentation.PlaylistCreatorViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.gson.Gson
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class PlaylistCreatorFragment : Fragment() {
@@ -37,7 +38,7 @@ class PlaylistCreatorFragment : Fragment() {
     private lateinit var newName: String
     private var imageUri: String = ""
     private var isChanged = false
-
+    private var originalPlaylist: Playlist? = null
     private lateinit var pickMedia: ActivityResultLauncher<PickVisualMediaRequest>
 
     private val nameWatcher = object : TextWatcher {
@@ -72,7 +73,15 @@ class PlaylistCreatorFragment : Fragment() {
         setupListeners()
         observeViewModel()
         handleBackPressed()
-        binding.createPlaylistBut.isEnabled = false
+
+        val playlistJson = arguments?.getString("playlist")
+        if (playlistJson != null) {
+            originalPlaylist = Gson().fromJson(playlistJson, Playlist::class.java)
+            fillFieldsFromPlaylist(originalPlaylist!!)
+            binding.createPlaylistBut.text = getString(R.string.save)
+        } else {
+            binding.createPlaylistBut.isEnabled = false
+        }
     }
 
     private fun setupListeners() {
@@ -96,7 +105,7 @@ class PlaylistCreatorFragment : Fragment() {
 
     private fun observeViewModel() {
         viewModel.getFile().observe(viewLifecycleOwner) { uri ->
-            updatePlaylists(uri.toString())
+            savePlaylists(uri.toString())
         }
     }
 
@@ -117,7 +126,7 @@ class PlaylistCreatorFragment : Fragment() {
     }
 
     private fun showQuitDialog() {
-        MaterialAlertDialogBuilder(requireContext(), R.style.dialog)
+        MaterialAlertDialogBuilder(requireContext(), R.style.toast)
             .setTitle(getString(R.string.playlist_creator_toast_title))
             .setMessage(getString(R.string.playlist_creator_toast_message))
             .setNeutralButton(getString(R.string.playlist_creator_resume), null)
@@ -155,29 +164,51 @@ class PlaylistCreatorFragment : Fragment() {
         newName = binding.playlistName.text.toString()
         val currentTime = Calendar.getInstance().time
 
-        if (imageUri.isNotEmpty()) {
+        if (isChanged && imageUri.isNotEmpty()) {
             viewModel.saveImage(
                 newName,
                 requireContext().contentResolver.openInputStream(imageUri.toUri()),
                 currentTime
             )
         } else {
-            updatePlaylists(imageUri)
+            savePlaylists(imageUri)
         }
     }
 
-    private fun updatePlaylists(savedImageUri: String) {
-        viewModel.updatePlaylists(
-            Playlist(
-                newName,
-                savedImageUri,
-                0,
-                binding.newPlaylistInfEt.text.toString(),
-                ""
+    private fun savePlaylists(savedImageUri: String) {
+        if (originalPlaylist == null) {
+            viewModel.updatePlaylists(
+                Playlist(
+                    newName,
+                    savedImageUri,
+                    0,
+                    binding.newPlaylistInfEt.text.toString(),
+                    ""
+                )
             )
-        )
-        Toast.makeText(requireContext(), "Плейлист $newName создан", Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(), "Плейлист $newName создан", Toast.LENGTH_LONG).show()
+        } else {
+            viewModel.updatePlaylists(
+                originalPlaylist!!.copy(
+                    name = newName,
+                    image = savedImageUri,
+                    info = binding.newPlaylistInfEt.text.toString()
+                )
+            )
+        }
         requireActivity().finish()
+    }
+
+    private fun fillFieldsFromPlaylist(playlist: Playlist) {
+        binding.playlistName.setText(playlist.name)
+        binding.newPlaylistInfEt.setText(playlist.info)
+
+        if (!playlist.image.isNullOrEmpty()) {
+            val imageUri = Uri.parse(playlist.image)
+            updatePlaylistImage(imageUri)
+            this.imageUri = imageUri.toString()
+            isChanged = true
+        }
     }
 
     override fun onDestroyView() {

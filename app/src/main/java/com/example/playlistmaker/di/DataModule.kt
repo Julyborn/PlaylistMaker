@@ -11,7 +11,9 @@ val dataModule = module {
         Room.databaseBuilder(
             get<Application>(),
             AppDatabase::class.java, "app-database"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     single { get<AppDatabase>().trackDao() }

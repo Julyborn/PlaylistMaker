@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="?attr/colorPrimary"
+    android:background="?attr/colorSecondaryVariant"
     tools:context=".main.ui.MainActivity">
     <androidx.fragment.app.FragmentContainerView
         android:layout_width="0dp"
@@ -33,13 +33,16 @@
         app:itemActiveIndicatorStyle="@android:color/transparent"
         android:layout_width="0dp"
         app:itemRippleColor="@null"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:menu="@menu/bottom_nav_menu"
         android:background="?attr/colorSecondaryVariant"
         app:itemIconTint="@color/bot_menu_ic"
-        app:itemTextColor="@color/bot_menu_ic"/>
-
+        app:itemIconSize="24dp"
+        app:itemIconPadding="8dp"
+        style="@style/CustomBottomNavigationStyle"
+        app:itemTextColor="@color/bot_menu_ic"
+        app:itemTextAppearanceInactive="@style/BottomNavigationTextAppearance"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -140,6 +140,18 @@
         <item name="android:textColor">@color/black_light</item>
     </style>
 
+    <style name="options">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">61dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:textColor">?attr/colorPrimaryVariant</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+    </style>
+
     <style name="save_button" parent="Widget.AppCompat.Button">
         <item name="android:background">@drawable/tap_selector</item>
         <item name="android:textColor">@color/white</item>
@@ -148,6 +160,21 @@
         <item name="android:fontFamily">@font/ys_display_regular</item>
         <item name="android:textSize">16sp</item>
         <item name="android:letterSpacing">0</item>
+    </style>
+
+    <style name="BottomNavigationTextAppearance" parent="TextAppearance.AppCompat.Caption">
+        <item name="android:textSize">12sp</item>
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">8dp</item>
+    </style>
+    <style name="CustomBottomNavigationStyle" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="itemTextAppearanceActive">@style/CustomBottomNavText</item>
+        <item name="itemTextAppearanceInactive">@style/CustomBottomNavText</item>
+        <item name="itemIconSize">20dp</item> <!-- Уменьшение размера иконки -->
+    </style>
+    <style name="CustomBottomNavText">
+        <item name="android:textSize">12sp</item>
+\        <item name="android:layout_marginBottom">8dp</item> <!-- Модификация для отступа снизу -->
     </style>
 
 </resources>
