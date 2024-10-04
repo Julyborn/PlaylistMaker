@@ -227,6 +227,7 @@ class SearchFragment : Fragment(), TrackInteractionListener {
         }
     }
 
+
     private fun showConnectionError(show: Boolean) {
         if (show) {
             binding.searchResults.visibility = View.GONE
