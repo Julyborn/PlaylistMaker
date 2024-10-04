@@ -257,5 +257,4 @@ class SearchFragment : Fragment(), TrackInteractionListener {
     companion object {
         private const val CLICK_DELAY = 1000L
     }
-
 }
